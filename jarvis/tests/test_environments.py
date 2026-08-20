@@ -214,3 +214,52 @@ class TestRepoEnvironment:
         for dangerous in ("repo_commit", "repo_push", "repo_checkout",
                           "repo_reset"):
             assert dangerous not in caps
+
+
+class TestStatusRenderingIsGeneric:
+    """The status display must not assume any environment's key names.
+
+    It did: it branched on environment id and fell through to a local_os shape,
+    so adding the repo environment crashed `--status` with KeyError:
+    'cpu_percent'. Any future adapter would have broken it identically.
+    """
+
+    def _render(self, state):
+        from unittest.mock import MagicMock
+        from jarvis.interface.cli import _show_status
+
+        env = MagicMock()
+        env.state.return_value = state
+        orch = MagicMock()
+        orch.environments = {"probe": env}
+        orch.router.status.return_value = []
+        orch.router.describe.return_value = {"free_ram_gb": 1.0}
+        _show_status(orch)          # must not raise
+
+    @pytest.mark.parametrize("state", [
+        {"cpu_percent": 5, "ram_used_gb": 1, "ram_total_gb": 16,
+         "disk_free_gb": 100},
+        {"online": True},
+        {"available": False, "why": "not a git repository"},
+        {"branch": "main", "clean": False, "changed_files": 3},
+        {"available": True},
+        {"something_new": 1, "unforeseen": "shape"},
+        {},
+    ])
+    def test_any_environment_shape_renders(self, state):
+        self._render(state)
+
+    def test_an_environment_that_raises_does_not_hide_the_others(self):
+        from unittest.mock import MagicMock
+        from jarvis.interface.cli import _show_status
+
+        bad = MagicMock()
+        bad.state.side_effect = RuntimeError("sensor exploded")
+        good = MagicMock()
+        good.state.return_value = {"online": True}
+        orch = MagicMock()
+        orch.environments = {"bad": bad, "good": good}
+        orch.router.status.return_value = []
+        orch.router.describe.return_value = {"free_ram_gb": 1.0}
+        _show_status(orch)
+        good.state.assert_called_once()

@@ -136,16 +136,35 @@ def _show_status(orch: Orchestrator) -> None:
     env_table = Table(title="Environments", box=None)
     env_table.add_column("environment"); env_table.add_column("state")
     for env_id, env in orch.environments.items():
-        state = env.state()
-        if env_id == "windows_gui":
-            detail = ("UI Automation ready" if state.get("available")
-                      else f"unavailable: {state.get('import_error')}")
-        elif env_id == "web":
-            detail = "online" if state.get("online") else "offline"
-        else:
+        try:
+            state = env.state()
+        except Exception as exc:      # noqa: BLE001 - one bad env must not hide the rest
+            env_table.add_row(env_id, f"[red]error: {exc}[/red]")
+            continue
+        # Rendered from whatever the environment actually reports rather than
+        # from a per-id branch. The previous version assumed every environment
+        # exposed cpu_percent, so adding the repo environment crashed --status
+        # outright: any new adapter would have broken it the same way.
+        if "cpu_percent" in state:
             detail = (f"CPU {state['cpu_percent']}% - "
-                      f"RAM {state['ram_used_gb']}/{state['ram_total_gb']} GB - "
-                      f"{state['disk_free_gb']} GB free")
+                      f"RAM {state.get('ram_used_gb')}/"
+                      f"{state.get('ram_total_gb')} GB - "
+                      f"{state.get('disk_free_gb')} GB free")
+        elif "online" in state:
+            detail = "online" if state["online"] else "offline"
+        elif state.get("available") is False:
+            detail = (f"unavailable: "
+                      f"{state.get('why') or state.get('import_error') or 'unknown'}")
+        elif "branch" in state:
+            detail = (f"{state['branch']} - "
+                      + ("clean" if state.get("clean")
+                         else f"{state.get('changed_files')} changed"))
+        elif state.get("available"):
+            detail = "ready"
+        else:
+            # Last resort: show the first couple of real values instead of a
+            # blank cell, so a new environment is still legible here.
+            detail = ", ".join(f"{k}={v}" for k, v in list(state.items())[:2]) or "-"
         env_table.add_row(env_id, detail)
     console.print(env_table)
 
