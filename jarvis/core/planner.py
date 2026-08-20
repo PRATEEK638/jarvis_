@@ -11,6 +11,7 @@ import json
 from typing import Any
 
 from jarvis.abilities import registry
+from jarvis.core import persona
 from jarvis.core.events import emit
 from jarvis.skills import registry as skills
 from jarvis.core.contracts import Plan, Step
@@ -133,7 +134,9 @@ Rules:
 def synthesize(provider: Provider, objective: str, evidence: str) -> tuple[str, Any]:
     """Turn collected evidence into the user-facing answer."""
     user = f"USER REQUEST:\n{objective}\n\nEVIDENCE:\n{evidence}"
-    text, call = provider.generate(ANSWER_SYSTEM, user, json_mode=False,
+    # Character is applied to the answer, never to planning or policy.
+    system = persona.system_prompt() + chr(10) * 2 + ANSWER_SYSTEM
+    text, call = provider.generate(system, user, json_mode=False,
                                     purpose="answer")
     return text.strip(), call
 
