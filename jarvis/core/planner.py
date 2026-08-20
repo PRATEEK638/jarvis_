@@ -11,6 +11,8 @@ import json
 from typing import Any
 
 from jarvis.abilities import registry
+from jarvis.core.events import emit
+from jarvis.skills import registry as skills
 from jarvis.core.contracts import Plan, Step
 from jarvis.models.providers import ModelError, Provider, extract_json
 
@@ -100,6 +102,16 @@ def make_plan(provider: Provider, objective: str, *,
         catalogue=registry.catalogue_for_prompt(),
         context=context or "(no additional context)",
     )
+    # Domain expertise, when the request clearly falls in a known domain. This
+    # is what turns "can call the tools" into "approaches the problem the way a
+    # competent practitioner would". Empty for anything that does not clearly
+    # match, so ordinary requests are not weighed down by an irrelevant
+    # playbook.
+    expertise = skills.prompt_for(objective)
+    if expertise:
+        system = system + chr(10) * 2 + expertise
+        emit("skills.applied",
+             skills=[sk.name for sk in skills.select(objective)])
     text, call = provider.generate(system, objective, json_mode=True,
                                    purpose="plan")
     raw = extract_json(text)
