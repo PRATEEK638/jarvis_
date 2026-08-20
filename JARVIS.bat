@@ -5,6 +5,7 @@ REM   JARVIS.bat --cli        text-only terminal session
 REM   JARVIS.bat --web        the browser control interface, at localhost:8731
 REM   JARVIS.bat --voice      talk to it
 REM   JARVIS.bat --status     what is available right now
+REM   JARVIS.bat --progress   how much of the vision is actually built
 REM   JARVIS.bat "create a folder called reports on my desktop"
 
 setlocal
@@ -45,6 +46,12 @@ REM Default to the desktop app: it is the real product surface, and unlike the
 REM browser it gets direct microphone/speaker access, so voice actually works.
 if "%~1"=="" (
     start "" ".venv\Scripts\pythonw.exe" -m jarvis.desktop
+    goto :eof
+)
+
+if "%~1"=="--progress" (
+    ".venv\Scripts\python.exe" -m jarvis.progress
+    pause
     goto :eof
 )
 
