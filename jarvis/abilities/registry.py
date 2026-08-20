@@ -228,6 +228,18 @@ ABILITIES: list[Ability] = [
         params={"path": "repository folder"},
         risk=Risk.LOW, verification="records_returned",
     ),
+    # -- learned file resolution ----------------------------------------------
+    Ability(
+        id="resolve_file", category=Category.FILE_SEARCH, environment="local_os",
+        objective="Find a file from a vague description like 'my marksheet' or "
+                  "'the internship report', using an index of this machine's "
+                  "own files ranked by name, folder, type and recency.",
+        params={"description": "how the user referred to the file",
+                "suffix": "optional type filter such as .pdf"},
+        required=["description"], risk=Risk.LOW, verification="result_only",
+        failure_modes=["index not built yet", "nothing matches the description"],
+    ),
+
     # -- code execution -------------------------------------------------------
     # The general-purpose primitive: given a problem nothing else covers,
     # write code and run it. HIGH risk always - there is no container, so the

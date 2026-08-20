@@ -281,6 +281,7 @@ class LocalOSEnvironment:
             "rename_path": self._rename_path,
             "find_files": self._find_files,
             "search_in_files": self._search_in_files,
+            "resolve_file": self._resolve_file,
             "open_app": self._open_app,
             "list_processes": self._list_processes,
             "run_command": self._run_command,
@@ -515,6 +516,38 @@ class LocalOSEnvironment:
             if query in name.replace(".exe", ""):
                 pids.append(proc.info["pid"])
         return pids
+
+    def _resolve_file(self, args: dict[str, Any]) -> ActionResult:
+        """Turn "my marksheet" into a real path, using the learned index."""
+        from jarvis.learning.file_index import FileIndex, rebuild_and_save
+
+        description = str(args.get("description") or args.get("name") or "").strip()
+        if not description:
+            return ActionResult(ok=False, error="missing_description",
+                                summary="Which file do you mean?")
+        index = FileIndex.load()
+        if not index.built_recently:
+            # Building takes under a second, so doing it on demand is better
+            # than failing and asking the user to run something first.
+            rebuild_and_save()
+            index = FileIndex.load()
+        hits = index.find(description, limit=5,
+                          suffix=args.get("suffix") or None)
+        if not hits:
+            return ActionResult(
+                ok=False, error="no_match",
+                summary=f"Nothing in your files matches '{description}'.",
+                evidence={"indexed": len(index.entries)})
+        best, score = hits[0]
+        others = [{"path": e.path, "score": s} for e, s in hits[1:]]
+        return ActionResult(
+            ok=True,
+            summary=f"{best.path}"
+                    + (f"  (also {len(others)} other close match(es))"
+                       if others else ""),
+            evidence={"path": best.path, "name": best.name,
+                      "folder": best.folder, "score": score,
+                      "alternatives": others, "indexed": len(index.entries)})
 
     def _open_app(self, args: dict[str, Any]) -> ActionResult:
         name = str(args.get("name") or args.get("app") or "").strip()
