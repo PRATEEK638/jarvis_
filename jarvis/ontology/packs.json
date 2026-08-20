@@ -1,0 +1,1253 @@
+{
+ "subsystems": {
+  "cognition": "Reasoning, planning, identity, context - the thinking layer",
+  "memory": "Everything persistent: memory types, retrieval, knowledge graph",
+  "world": "Live state of the machine and its environments",
+  "perception": "Turning raw input (screen, audio, documents) into structure",
+  "models": "Model registry, routing, inference, resource and cost control",
+  "abilities": "Tools, skills, capability discovery, extensibility",
+  "execution": "Acting, verifying, recovering, orchestrating agents",
+  "knowledge": "External information: web, documents, curation",
+  "domain": "Professional capability domains (SDE, DevOps, office, science)",
+  "learning": "Improving from experience, demonstration and failure",
+  "autonomy": "Proactivity, attention, commitments, long-running work",
+  "safety": "Policy, permissions, risk, privacy, audit, escalation",
+  "evaluation": "Measuring the system honestly and catching regressions",
+  "interface": "How a human interacts: voice, desktop, web, CLI",
+  "devices": "Multiple machines as one identity"
+ },
+ "packs": [
+  {
+   "id": 1,
+   "name": "Core Cognitive Engine",
+   "subsystem": "cognition",
+   "purpose": "Intent, decomposition, reasoning, planning, metacognition",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/core/planner.py + orchestrator loop",
+   "depends_on": [
+    16,
+    6,
+    9
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Self / Identity Engine",
+   "subsystem": "cognition",
+   "purpose": "Persistent identity, capabilities, limits, responsibilities",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/ontology/self_model.py",
+   "depends_on": [
+    99,
+    1
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Personality Engine",
+   "subsystem": "cognition",
+   "purpose": "Stable communication style that never overrides policy",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "JARVIS_SYSTEM + voice PERSONA",
+   "depends_on": [
+    2,
+    4
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Values / Policy Engine",
+   "subsystem": "safety",
+   "purpose": "Machine-readable behavioural, safety and approval policy",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/policy/guardrails.py",
+   "depends_on": []
+  },
+  {
+   "id": 5,
+   "name": "Human Model",
+   "subsystem": "cognition",
+   "purpose": "User goals, preferences, workflows, approval patterns",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "memory PREFERENCE type",
+   "depends_on": [
+    9
+   ]
+  },
+  {
+   "id": 6,
+   "name": "World Model",
+   "subsystem": "world",
+   "purpose": "Live state of computer, apps, files, network, projects",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/environments/*",
+   "depends_on": [
+    12
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Perception Engine",
+   "subsystem": "perception",
+   "purpose": "Text, speech, screen, document, UI perception",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "environments observe() + voice",
+   "depends_on": []
+  },
+  {
+   "id": 8,
+   "name": "Multimodal Fusion",
+   "subsystem": "perception",
+   "purpose": "Unified representation across text/screen/audio",
+   "status": "D",
+   "maturity": "needs_research",
+   "extension_point": "perception layer",
+   "depends_on": [
+    7
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Memory Fabric",
+   "subsystem": "memory",
+   "purpose": "20 memory types with provenance, decay, consolidation",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/memory/store.py",
+   "depends_on": []
+  },
+  {
+   "id": 10,
+   "name": "Advanced RAG / Retrieval Fabric",
+   "subsystem": "memory",
+   "purpose": "Hybrid retrieval, reranking, multi-hop, corrective RAG",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/memory/embeddings.py",
+   "depends_on": [
+    9
+   ]
+  },
+  {
+   "id": 11,
+   "name": "Knowledge Graph",
+   "subsystem": "memory",
+   "purpose": "Entities, relations, temporal graph, provenance",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "memory store (graph table)",
+   "depends_on": [
+    9
+   ]
+  },
+  {
+   "id": 12,
+   "name": "Event Fabric",
+   "subsystem": "world",
+   "purpose": "Ingestion, normalisation, correlation, replay",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/core/events.py",
+   "depends_on": []
+  },
+  {
+   "id": 13,
+   "name": "Goal / Responsibility Engine",
+   "subsystem": "cognition",
+   "purpose": "Goal graph, commitments, deadlines, completion criteria",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "contracts.Goal",
+   "depends_on": [
+    1
+   ]
+  },
+  {
+   "id": 14,
+   "name": "Planning Engine",
+   "subsystem": "cognition",
+   "purpose": "Hierarchical/DAG/parallel/recovery planning",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/core/planner.py",
+   "depends_on": [
+    1,
+    13
+   ]
+  },
+  {
+   "id": 15,
+   "name": "Agent Orchestration",
+   "subsystem": "execution",
+   "purpose": "Specialist agents, delegation, supervision, lifecycle",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "orchestrator seam",
+   "depends_on": [
+    14,
+    16
+   ]
+  },
+  {
+   "id": 16,
+   "name": "Model Fabric",
+   "subsystem": "models",
+   "purpose": "Registry, routing, fallback, escalation, cost/privacy",
+   "status": "A",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/models/router.py",
+   "depends_on": []
+  },
+  {
+   "id": 17,
+   "name": "Local AI / Inference",
+   "subsystem": "models",
+   "purpose": "Local LLM/SLM/embedding/vision runtimes",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/models/providers.py",
+   "depends_on": [
+    16
+   ]
+  },
+  {
+   "id": 18,
+   "name": "Computer Control",
+   "subsystem": "execution",
+   "purpose": "Filesystem, processes, PowerShell, UIA, keyboard/mouse",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/environments/local_os.py + windows_gui.py",
+   "depends_on": [
+    6
+   ]
+  },
+  {
+   "id": 19,
+   "name": "Browser Intelligence",
+   "subsystem": "execution",
+   "purpose": "Navigation, DOM, forms, auth, downloads",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/environments/web.py",
+   "depends_on": [
+    6
+   ]
+  },
+  {
+   "id": 20,
+   "name": "Web Intelligence",
+   "subsystem": "knowledge",
+   "purpose": "Search, source ranking, contradiction detection, citation",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/environments/web.py",
+   "depends_on": [
+    19
+   ]
+  },
+  {
+   "id": 21,
+   "name": "Computer Vision",
+   "subsystem": "perception",
+   "purpose": "Screen understanding, UI detection, visual grounding",
+   "status": "D",
+   "maturity": "needs_research",
+   "extension_point": "perception layer / vision model route",
+   "depends_on": [
+    7,
+    18
+   ]
+  },
+  {
+   "id": 22,
+   "name": "Voice / Audio",
+   "subsystem": "interface",
+   "purpose": "Wake word, VAD, streaming ASR, barge-in, TTS",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/voice/live.py",
+   "depends_on": [
+    7
+   ]
+  },
+  {
+   "id": 23,
+   "name": "Document Intelligence",
+   "subsystem": "knowledge",
+   "purpose": "PDF/DOCX/XLSX parsing, tables, layout, generation",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "abilities + a documents environment",
+   "depends_on": [
+    7
+   ]
+  },
+  {
+   "id": 24,
+   "name": "Office Automation",
+   "subsystem": "domain",
+   "purpose": "Email, calendar, spreadsheets, approvals",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "new environment adapter",
+   "depends_on": [
+    23,
+    25
+   ]
+  },
+  {
+   "id": 25,
+   "name": "Communication Engine",
+   "subsystem": "domain",
+   "purpose": "Email/messaging, threads, drafting, follow-up",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "new environment adapter",
+   "depends_on": [
+    12
+   ]
+  },
+  {
+   "id": 26,
+   "name": "Software Engineering",
+   "subsystem": "domain",
+   "purpose": "Repo understanding, AST, tests, review, CI/CD",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "skills/library + a repo environment",
+   "depends_on": [
+    43
+   ]
+  },
+  {
+   "id": 27,
+   "name": "FDE / Field Engineering",
+   "subsystem": "domain",
+   "purpose": "Customer env analysis, integration, incident handling",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills/library",
+   "depends_on": [
+    26,
+    32
+   ]
+  },
+  {
+   "id": 28,
+   "name": "AI/ML Engineering",
+   "subsystem": "domain",
+   "purpose": "Datasets, training, evaluation, deployment, drift",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills/library",
+   "depends_on": [
+    29
+   ]
+  },
+  {
+   "id": 29,
+   "name": "Data Engineering",
+   "subsystem": "domain",
+   "purpose": "SQL, ETL, pipelines, validation, lineage",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills/library + a data environment",
+   "depends_on": [
+    30
+   ]
+  },
+  {
+   "id": 30,
+   "name": "Database Engine",
+   "subsystem": "domain",
+   "purpose": "Schema understanding, query generation, migration",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "new environment adapter",
+   "depends_on": []
+  },
+  {
+   "id": 31,
+   "name": "DevOps",
+   "subsystem": "domain",
+   "purpose": "Git, CI/CD, Docker, Terraform, deployment, rollback",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills/library + shell",
+   "depends_on": [
+    26
+   ]
+  },
+  {
+   "id": 32,
+   "name": "SRE / Operations",
+   "subsystem": "domain",
+   "purpose": "Metrics, logs, traces, incidents, RCA, runbooks",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills/library",
+   "depends_on": [
+    12,
+    31
+   ]
+  },
+  {
+   "id": 33,
+   "name": "Cloud Engine",
+   "subsystem": "domain",
+   "purpose": "AWS/Azure/GCP compute, IAM, billing, cost optimisation",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "new environment adapter",
+   "depends_on": [
+    31
+   ]
+  },
+  {
+   "id": 34,
+   "name": "System Administration",
+   "subsystem": "domain",
+   "purpose": "CPU/RAM/disk, services, registry, scheduled tasks",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "local_os + skills/system-admin.md",
+   "depends_on": [
+    18
+   ]
+  },
+  {
+   "id": 35,
+   "name": "Network Intelligence",
+   "subsystem": "domain",
+   "purpose": "DNS, ports, routing, TLS, connectivity diagnostics",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "new environment adapter",
+   "depends_on": [
+    18
+   ]
+  },
+  {
+   "id": 36,
+   "name": "Security Engine",
+   "subsystem": "safety",
+   "purpose": "AuthN/Z, secrets, injection defence, exfiltration control",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/policy/ + config/settings.py",
+   "depends_on": [
+    4
+   ]
+  },
+  {
+   "id": 37,
+   "name": "Sandbox / Execution Security",
+   "subsystem": "safety",
+   "purpose": "Containers, VMs, isolation, resource limits",
+   "status": "D",
+   "maturity": "engineering_ready",
+   "extension_point": "execution fabric seam",
+   "depends_on": [
+    36
+   ]
+  },
+  {
+   "id": 38,
+   "name": "Verification Engine",
+   "subsystem": "execution",
+   "purpose": "Per-domain verification against observable state",
+   "status": "A",
+   "maturity": "possible_today",
+   "extension_point": "environments verify()",
+   "depends_on": [
+    6
+   ]
+  },
+  {
+   "id": 39,
+   "name": "Recovery Engine",
+   "subsystem": "execution",
+   "purpose": "Retry, fallback, rollback, checkpoint, escalation",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "orchestrator recovery path",
+   "depends_on": [
+    38
+   ]
+  },
+  {
+   "id": 40,
+   "name": "Learning Engine",
+   "subsystem": "learning",
+   "purpose": "Learn from correction, approval, failure, outcome",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "memory FAILURE/EXPERIENCE types",
+   "depends_on": [
+    9
+   ]
+  },
+  {
+   "id": 41,
+   "name": "Demonstration Learning",
+   "subsystem": "learning",
+   "purpose": "Capture human demonstration into a reusable skill",
+   "status": "D",
+   "maturity": "needs_research",
+   "extension_point": "skills registry",
+   "depends_on": [
+    43,
+    21
+   ]
+  },
+  {
+   "id": 42,
+   "name": "Process Mining",
+   "subsystem": "learning",
+   "purpose": "Reconstruct workflows from event logs, find automation",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "events.jsonl",
+   "depends_on": [
+    12
+   ]
+  },
+  {
+   "id": 43,
+   "name": "Skill Engine",
+   "subsystem": "abilities",
+   "purpose": "Skill representation, composition, versioning, confidence",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/skills/registry.py",
+   "depends_on": [
+    9
+   ]
+  },
+  {
+   "id": 44,
+   "name": "Capability Discovery",
+   "subsystem": "abilities",
+   "purpose": "Discover apps, APIs, CLIs; register new capability",
+   "status": "D",
+   "maturity": "needs_research",
+   "extension_point": "abilities registry",
+   "depends_on": [
+    94
+   ]
+  },
+  {
+   "id": 45,
+   "name": "Tool Fabric",
+   "subsystem": "abilities",
+   "purpose": "Tool registry, schema, permissions, health, versioning",
+   "status": "A",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/abilities/registry.py",
+   "depends_on": []
+  },
+  {
+   "id": 46,
+   "name": "Plugin / Extension System",
+   "subsystem": "abilities",
+   "purpose": "MCP, connectors, third-party capability, trust model",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "abilities registry",
+   "depends_on": [
+    45,
+    36
+   ]
+  },
+  {
+   "id": 47,
+   "name": "Device Fabric",
+   "subsystem": "devices",
+   "purpose": "Laptop/phone/server/IoT discovery, capability, routing",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "new fabric module",
+   "depends_on": []
+  },
+  {
+   "id": 48,
+   "name": "Compute Orchestration",
+   "subsystem": "models",
+   "purpose": "Route by CPU/GPU/VRAM/battery/privacy/latency",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/models/router.py",
+   "depends_on": [
+    16
+   ]
+  },
+  {
+   "id": 49,
+   "name": "Cross-Device Continuity",
+   "subsystem": "devices",
+   "purpose": "Shared identity/memory/tasks; device handoff",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "memory + device fabric",
+   "depends_on": [
+    47,
+    9
+   ]
+  },
+  {
+   "id": 50,
+   "name": "Proactivity Engine",
+   "subsystem": "autonomy",
+   "purpose": "Decide ignore/log/batch/prepare/notify/ask/act",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "event subscriber",
+   "depends_on": [
+    12,
+    51
+   ]
+  },
+  {
+   "id": 51,
+   "name": "Attention Engine",
+   "subsystem": "autonomy",
+   "purpose": "Attention budget, batching, quiet mode, escalation",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "notification layer",
+   "depends_on": []
+  },
+  {
+   "id": 52,
+   "name": "Anticipation Engine",
+   "subsystem": "autonomy",
+   "purpose": "Predict next need; prepare without acting",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "event subscriber",
+   "depends_on": [
+    50
+   ]
+  },
+  {
+   "id": 53,
+   "name": "Project Management",
+   "subsystem": "domain",
+   "purpose": "Milestones, dependencies, blockers, reports",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "memory PROJECT type",
+   "depends_on": [
+    13
+   ]
+  },
+  {
+   "id": 54,
+   "name": "Organizational Intelligence",
+   "subsystem": "domain",
+   "purpose": "People, teams, systems, institutional memory",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "memory ORGANIZATIONAL type",
+   "depends_on": [
+    11
+   ]
+  },
+  {
+   "id": 55,
+   "name": "Expertise Engine",
+   "subsystem": "domain",
+   "purpose": "Who knows what; who should review this",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "knowledge graph",
+   "depends_on": [
+    54,
+    11
+   ]
+  },
+  {
+   "id": 56,
+   "name": "Decision Intelligence",
+   "subsystem": "memory",
+   "purpose": "Capture decisions, alternatives, evidence, outcome",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "memory DECISION type",
+   "depends_on": [
+    9
+   ]
+  },
+  {
+   "id": 57,
+   "name": "Risk Engine",
+   "subsystem": "safety",
+   "purpose": "Probability x impact, reversibility, risk-aware selection",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "Ability.risk + policy gate",
+   "depends_on": [
+    4
+   ]
+  },
+  {
+   "id": 58,
+   "name": "Simulation Engine",
+   "subsystem": "execution",
+   "purpose": "Sandbox/staging/dry-run before risky action",
+   "status": "D",
+   "maturity": "engineering_ready",
+   "extension_point": "execution fabric seam",
+   "depends_on": [
+    37
+   ]
+  },
+  {
+   "id": 59,
+   "name": "Causal / Counterfactual Engine",
+   "subsystem": "cognition",
+   "purpose": "Causal graphs, interventions, what-if analysis",
+   "status": "D",
+   "maturity": "needs_research",
+   "extension_point": "world model",
+   "depends_on": [
+    6,
+    12
+   ]
+  },
+  {
+   "id": 60,
+   "name": "Scientific Research Engine",
+   "subsystem": "domain",
+   "purpose": "Literature, hypothesis, experiment, reproducibility",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills/library + research memory",
+   "depends_on": [
+    20
+   ]
+  },
+  {
+   "id": 61,
+   "name": "Media Engine",
+   "subsystem": "domain",
+   "purpose": "Image/audio/video transcription, editing, generation",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "new environment adapter",
+   "depends_on": [
+    7
+   ]
+  },
+  {
+   "id": 62,
+   "name": "Creative Engine",
+   "subsystem": "domain",
+   "purpose": "Writing, design, diagrams, ideation",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "model fabric",
+   "depends_on": [
+    16
+   ]
+  },
+  {
+   "id": 63,
+   "name": "Analytics Engine",
+   "subsystem": "domain",
+   "purpose": "Statistics, visualisation, forecasting, anomalies",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills + python execution",
+   "depends_on": [
+    29
+   ]
+  },
+  {
+   "id": 64,
+   "name": "Personal Productivity",
+   "subsystem": "domain",
+   "purpose": "Tasks, calendar, notes, reminders, planning",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "memory + scheduler",
+   "depends_on": [
+    9
+   ]
+  },
+  {
+   "id": 65,
+   "name": "Financial / Administrative",
+   "subsystem": "domain",
+   "purpose": "Invoices, budgets, reconciliation - approval gated",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "office automation + policy",
+   "depends_on": [
+    24,
+    4
+   ]
+  },
+  {
+   "id": 66,
+   "name": "Compliance / Audit",
+   "subsystem": "safety",
+   "purpose": "Policy checking, evidence, retention, provenance",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "events.jsonl audit trail",
+   "depends_on": [
+    87
+   ]
+  },
+  {
+   "id": 67,
+   "name": "Knowledge Curation",
+   "subsystem": "knowledge",
+   "purpose": "Ingest, dedupe, classify, extract, update graph",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "memory + RAG",
+   "depends_on": [
+    10,
+    11
+   ]
+  },
+  {
+   "id": 68,
+   "name": "Continuous Knowledge Refresh",
+   "subsystem": "knowledge",
+   "purpose": "Freshness monitoring, revalidation, expiry",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "event subscriber",
+   "depends_on": [
+    67
+   ]
+  },
+  {
+   "id": 69,
+   "name": "Self-Monitoring",
+   "subsystem": "evaluation",
+   "purpose": "Model/tool/agent/retrieval performance, regressions",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "events.jsonl + benchmark.py",
+   "depends_on": [
+    12
+   ]
+  },
+  {
+   "id": 70,
+   "name": "Self-Evaluation",
+   "subsystem": "evaluation",
+   "purpose": "Task/skill/model/RAG/agent evaluation",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/benchmark.py + stress.py",
+   "depends_on": [
+    69
+   ]
+  },
+  {
+   "id": 71,
+   "name": "Personal Benchmark",
+   "subsystem": "evaluation",
+   "purpose": "Real user workflows become regression tests",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/benchmark.py",
+   "depends_on": [
+    70
+   ]
+  },
+  {
+   "id": 72,
+   "name": "Self-Improvement",
+   "subsystem": "learning",
+   "purpose": "Observe-measure-diagnose-test-promote or reject",
+   "status": "D",
+   "maturity": "needs_research",
+   "extension_point": "learning engine",
+   "depends_on": [
+    40,
+    70
+   ]
+  },
+  {
+   "id": 73,
+   "name": "Self-Healing",
+   "subsystem": "execution",
+   "purpose": "Service/agent/model/tool recovery, workflow resume",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "circuit breaker + failover",
+   "depends_on": [
+    39
+   ]
+  },
+  {
+   "id": 74,
+   "name": "Long-Running Autonomy",
+   "subsystem": "autonomy",
+   "purpose": "Durable state across hours/days/weeks; checkpoints",
+   "status": "D",
+   "maturity": "engineering_ready",
+   "extension_point": "durable task store",
+   "depends_on": [
+    13,
+    39
+   ]
+  },
+  {
+   "id": 75,
+   "name": "Commitment / Follow-Through",
+   "subsystem": "autonomy",
+   "purpose": "Promises, pending actions, waiting states",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "memory COMMITMENT type",
+   "depends_on": [
+    13,
+    9
+   ]
+  },
+  {
+   "id": 76,
+   "name": "Digital Workflow Optimizer",
+   "subsystem": "learning",
+   "purpose": "Detect repetition, bottlenecks, automation chances",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "process mining",
+   "depends_on": [
+    42
+   ]
+  },
+  {
+   "id": 77,
+   "name": "Personal Digital Twin",
+   "subsystem": "cognition",
+   "purpose": "User projects, workflows, tools, commitments",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "human model + memory",
+   "depends_on": [
+    5,
+    9
+   ]
+  },
+  {
+   "id": 78,
+   "name": "Organizational Digital Twin",
+   "subsystem": "domain",
+   "purpose": "People, systems, processes, dependencies",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "organizational intelligence",
+   "depends_on": [
+    54
+   ]
+  },
+  {
+   "id": 79,
+   "name": "Personalization Engine",
+   "subsystem": "cognition",
+   "purpose": "Preferences across tools, comms, workflow, approvals",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "memory PREFERENCE type",
+   "depends_on": [
+    5
+   ]
+  },
+  {
+   "id": 80,
+   "name": "Human Escalation Engine",
+   "subsystem": "safety",
+   "purpose": "Know when NOT to act; present options and trade-offs",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "policy gate + coverage.py",
+   "depends_on": [
+    4,
+    57
+   ]
+  },
+  {
+   "id": 81,
+   "name": "Decision Compression",
+   "subsystem": "interface",
+   "purpose": "Compress information into options + recommendation",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "answer synthesis",
+   "depends_on": [
+    80
+   ]
+  },
+  {
+   "id": 82,
+   "name": "Observability",
+   "subsystem": "evaluation",
+   "purpose": "Traces: goal-plan-retrieval-tool-verify-result",
+   "status": "A",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/core/events.py + RouteTrace",
+   "depends_on": [
+    12
+   ]
+  },
+  {
+   "id": 83,
+   "name": "Security Observability",
+   "subsystem": "safety",
+   "purpose": "Permission changes, credential access, external calls",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "events.jsonl with secret scrubbing",
+   "depends_on": [
+    82,
+    36
+   ]
+  },
+  {
+   "id": 84,
+   "name": "Resource Management",
+   "subsystem": "models",
+   "purpose": "CPU/GPU/RAM/VRAM/API/time/attention budgets",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "router resource guards",
+   "depends_on": [
+    48
+   ]
+  },
+  {
+   "id": 85,
+   "name": "Cost Optimization",
+   "subsystem": "models",
+   "purpose": "Model/cloud/compute cost, dynamic optimisation",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "router free/metered tiers",
+   "depends_on": [
+    84
+   ]
+  },
+  {
+   "id": 86,
+   "name": "Privacy Engine",
+   "subsystem": "safety",
+   "purpose": "Local-first, sensitive detection, remote inference policy",
+   "status": "A",
+   "maturity": "possible_today",
+   "extension_point": "router privacy pinning",
+   "depends_on": [
+    4,
+    16
+   ]
+  },
+  {
+   "id": 87,
+   "name": "Audit / Provenance",
+   "subsystem": "safety",
+   "purpose": "Which source/model/tool/approval produced this",
+   "status": "A",
+   "maturity": "possible_today",
+   "extension_point": "events.jsonl + traces.jsonl",
+   "depends_on": [
+    82
+   ]
+  },
+  {
+   "id": 88,
+   "name": "Skill Marketplace / Registry",
+   "subsystem": "abilities",
+   "purpose": "Discovery, trust, permissions, sandbox, rollback",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "skills registry",
+   "depends_on": [
+    43,
+    37
+   ]
+  },
+  {
+   "id": 89,
+   "name": "Tool Marketplace / Registry",
+   "subsystem": "abilities",
+   "purpose": "Tool discovery, trust, testing, versioning, rollback",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "abilities registry",
+   "depends_on": [
+    45,
+    37
+   ]
+  },
+  {
+   "id": 90,
+   "name": "Future Environment Engine",
+   "subsystem": "world",
+   "purpose": "Robots, IoT, AR/VR, vehicles - same observe/act/verify",
+   "status": "C",
+   "maturity": "engineering_ready",
+   "extension_point": "Environment protocol",
+   "depends_on": [
+    6
+   ]
+  },
+  {
+   "id": 91,
+   "name": "Physical World Extension",
+   "subsystem": "world",
+   "purpose": "Robotics, ROS2, SLAM, sensors, actuators",
+   "status": "D",
+   "maturity": "needs_research",
+   "extension_point": "Environment protocol",
+   "depends_on": [
+    90
+   ]
+  },
+  {
+   "id": 92,
+   "name": "Multi-Device Identity",
+   "subsystem": "devices",
+   "purpose": "One identity across laptop/phone/server/cloud",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "self model + device fabric",
+   "depends_on": [
+    2,
+    47
+   ]
+  },
+  {
+   "id": 93,
+   "name": "Cross-Machine Orchestration",
+   "subsystem": "devices",
+   "purpose": "Task/compute/data/privacy routing across machines",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "device fabric",
+   "depends_on": [
+    47,
+    48
+   ]
+  },
+  {
+   "id": 94,
+   "name": "Application Knowledge Engine",
+   "subsystem": "world",
+   "purpose": "Per-app purpose, UI, API, workflows, failure modes",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "world model (application RAG)",
+   "depends_on": [
+    6,
+    10
+   ]
+  },
+  {
+   "id": 95,
+   "name": "Universal Action Language",
+   "subsystem": "abilities",
+   "purpose": "Semantic actions normalised across API/CLI/GUI/DOM",
+   "status": "C",
+   "maturity": "possible_today",
+   "extension_point": "Ability schema",
+   "depends_on": [
+    45
+   ]
+  },
+  {
+   "id": 96,
+   "name": "Universal Task Representation",
+   "subsystem": "cognition",
+   "purpose": "Goal/inputs/preconditions/verification/rollback",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "contracts.Goal + Plan + Step",
+   "depends_on": [
+    13
+   ]
+  },
+  {
+   "id": 97,
+   "name": "Capability Gap / Acquisition",
+   "subsystem": "abilities",
+   "purpose": "Classify the gap; determine acquisition strategy",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "jarvis/core/coverage.py",
+   "depends_on": [
+    44,
+    2
+   ]
+  },
+  {
+   "id": 98,
+   "name": "Experimentation Engine",
+   "subsystem": "evaluation",
+   "purpose": "Hypothesis, variables, procedure, reproducibility",
+   "status": "D",
+   "maturity": "possible_today",
+   "extension_point": "evaluation harness",
+   "depends_on": [
+    70
+   ]
+  },
+  {
+   "id": 99,
+   "name": "Context Engine",
+   "subsystem": "cognition",
+   "purpose": "Conversation/task/project/time/environment context",
+   "status": "B",
+   "maturity": "possible_today",
+   "extension_point": "working memory + world model",
+   "depends_on": [
+    6,
+    9
+   ]
+  },
+  {
+   "id": 100,
+   "name": "Meta-Intelligence",
+   "subsystem": "cognition",
+   "purpose": "The controller above everything: what/which/how/verify",
+   "status": "C",
+   "maturity": "needs_research",
+   "extension_point": "orchestrator",
+   "depends_on": [
+    1,
+    2,
+    6,
+    9,
+    16
+   ]
+  },
+  {
+   "id": 101,
+   "name": "Extensibility / Evolution",
+   "subsystem": "abilities",
+   "purpose": "New models/tools/envs/memory types without redesign",
+   "status": "A",
+   "maturity": "possible_today",
+   "extension_point": "every registry is data-driven",
+   "depends_on": [
+    45,
+    43,
+    16
+   ]
+  }
+ ]
+}

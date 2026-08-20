@@ -1,5 +1,20 @@
 """The full-bleed HUD canvas.
 
+ATTRIBUTION
+-----------
+The visual design of this HUD is derived from Mark-L by FatihMakes
+(https://github.com/FatihMakes/Mark-L), which is licensed
+Creative Commons BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/).
+
+Specifically derived: the composition of dot grid, layered halo, expanding
+pulse rings, counter-rotating segmented arc rings, dual scanners, graduated
+bezel, crosshair, corner brackets, particle emission and bar spectrum.
+
+The implementation here was written independently against that design rather
+than copied - the animation state model, easing, colour system and data
+bindings differ - but the look is theirs and the attribution is required by
+the licence. BY-NC also means this must not be used commercially.
+
 A single custom-painted surface: dot grid, halo, expanding pulse rings,
 segmented counter-rotating arc rings, sweeping scanners, a graduated bezel,
 crosshair, corner brackets, a reactive core, emitted particles, status

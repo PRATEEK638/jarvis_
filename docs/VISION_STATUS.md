@@ -78,3 +78,38 @@ The **breadth** is a fraction of the document. That is expected: Part 70 of the
 vision itself says not to pretend the whole system can be built in one pass, and
 to grow capability-by-capability on a foundation that actually runs. That is
 what this is.
+
+---
+
+## Third-party attribution
+
+**Mark-L** by FatihMakes — https://github.com/FatihMakes/Mark-L — licensed
+**CC BY-NC 4.0**.
+
+The desktop HUD's *visual design* is derived from Mark-L: the composition of
+dot grid, layered halo, expanding pulse rings, counter-rotating segmented arc
+rings, dual scanners, graduated bezel, crosshair, corner brackets, particle
+emission and bar spectrum. The `MetricBar` layout and its 65%/85% warning
+thresholds follow theirs as well.
+
+The implementation was written against that design rather than copied — a line
+comparison shows 24 of 138 substantive lines in `hud_canvas.py` matching, and
+those are near-unavoidable Qt boilerplate (`setRenderHint`, `setPen(NoPen)`,
+standard circle geometry). The animation state model, easing, colour system and
+data bindings are different, and one behaviour is deliberately different: their
+spectrum is `random.randint(3, 20)` while speaking, whereas ours is driven by
+the real RMS of the audio stream.
+
+**Two consequences of the licence that matter:**
+
+- **BY** — attribution is required. It is given here and in the source headers
+  of `jarvis/desktop/widgets/hud_canvas.py` and `metricbar.py`.
+- **NC** — non-commercial use only. This project must not be sold or used
+  commercially while that design remains.
+
+**If this is submitted for academic assessment, disclose the derivation.**
+Reusing an open-source design is normal and legitimate engineering; presenting
+it as wholly original is not, and institutions treat that as plagiarism. State
+plainly that the HUD visual design is derived from Mark-L under CC BY-NC 4.0,
+and that the backend (orchestrator, router, abilities, memory, policy,
+verification) is original work.

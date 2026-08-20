@@ -1,4 +1,9 @@
-"""Compact labelled metric with a fill bar."""
+"""Compact labelled metric with a fill bar.
+
+Layout and the 65%/85% warning thresholds follow Mark-L by FatihMakes
+(https://github.com/FatihMakes/Mark-L), CC BY-NC 4.0. See hud_canvas.py for
+the full attribution note.
+"""
 
 from __future__ import annotations
 
