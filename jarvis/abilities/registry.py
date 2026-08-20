@@ -228,6 +228,45 @@ ABILITIES: list[Ability] = [
         params={"path": "repository folder"},
         risk=Risk.LOW, verification="records_returned",
     ),
+    # -- hardware -----------------------------------------------------------
+    # Reads are LOW; writes are MEDIUM because they are startling rather than
+    # destructive - full volume at 2am should ask first.
+    Ability(
+        id="hardware_status", category=Category.SYSTEM, environment="hardware",
+        objective="Report battery, CPU speed, GPU temperature and memory, "
+                  "display brightness and audio volume.",
+        params={}, risk=Risk.LOW, verification="result_only",
+        failure_modes=["no NVIDIA GPU present", "sensor not exposed by firmware"],
+    ),
+    Ability(
+        id="set_volume", category=Category.SYSTEM, environment="hardware",
+        objective="Set the system audio volume, or mute and unmute it.",
+        params={"percent": "target volume 0-100",
+                "mute": "true to mute, false to unmute"},
+        risk=Risk.MEDIUM, verification="volume_read_back",
+        rollback="set the previous percentage again",
+    ),
+    Ability(
+        id="set_brightness", category=Category.SYSTEM, environment="hardware",
+        objective="Set the internal display brightness.",
+        params={"percent": "target brightness 0-100"}, required=["percent"],
+        risk=Risk.MEDIUM, verification="brightness_read_back",
+        failure_modes=["external monitors need DDC/CI, which is unsupported"],
+        rollback="set the previous percentage again",
+    ),
+    Ability(
+        id="power_plan", category=Category.SYSTEM, environment="hardware",
+        objective="Report the active Windows power plan, or switch to another.",
+        params={"plan": "name to switch to; omit to just report"},
+        risk=Risk.MEDIUM, verification="result_only",
+        rollback="switch back to the previously active plan",
+    ),
+    Ability(
+        id="wifi_status", category=Category.SYSTEM, environment="hardware",
+        objective="Report the wireless adapter state, network and signal.",
+        params={}, risk=Risk.LOW, verification="result_only",
+    ),
+
     Ability(
         id="repo_search", category=Category.FILE_SEARCH, environment="repo",
         objective="Search the tracked source of a repository for a string, "
