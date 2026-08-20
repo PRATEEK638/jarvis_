@@ -19,7 +19,7 @@ import time
 from typing import Any, Callable
 
 from jarvis.abilities import registry
-from jarvis.core import commitments, coverage, fastpath, planner
+from jarvis.core import commitments, coverage, critic, fastpath, planner
 from jarvis.core.contracts import (
     ActionResult,
     Category,
@@ -212,8 +212,22 @@ class Orchestrator:
                                                context=context)
                 trace.calls.append(call)
                 self.router.mark_ok(route.id)
+
+                # A plan can parse perfectly and still be wrong. Measured:
+                # "why is my pc slow, work out what is causing it" produced a
+                # lone system_state step, which reports numbers and never
+                # reaches a cause. Escalating beats executing that.
+                verdict = critic.review(goal.objective, plan)
+                if not verdict and attempt < len(chain[:4]) - 1:
+                    errors.append(f"{route.id}: {verdict.reason}")
+                    emit("plan.rejected", goal_id=goal.id, route=route.id,
+                         reason=verdict.reason)
+                    self._progress(f"plan rejected: {verdict.reason}")
+                    continue
+
                 emit("plan.created", goal_id=goal.id, steps=len(plan.steps),
-                     route=route.id, attempt=attempt + 1)
+                     route=route.id, attempt=attempt + 1,
+                     critic="passed" if verdict else "accepted_last_resort")
                 return plan, "", provider
             except ModelUnavailable as exc:
                 errors.append(f"{route.id}: {exc}")
