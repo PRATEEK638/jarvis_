@@ -29,7 +29,9 @@
     16,
     6,
     9
-   ]
+   ],
+   "sub_capabilities": 33,
+   "sub_implemented": 8
   },
   {
    "id": 2,
@@ -42,7 +44,9 @@
    "depends_on": [
     99,
     1
-   ]
+   ],
+   "sub_capabilities": 19,
+   "sub_implemented": 7
   },
   {
    "id": 3,
@@ -55,7 +59,9 @@
    "depends_on": [
     2,
     4
-   ]
+   ],
+   "sub_capabilities": 18,
+   "sub_implemented": 6
   },
   {
    "id": 4,
@@ -65,7 +71,9 @@
    "status": "B",
    "maturity": "possible_today",
    "extension_point": "jarvis/policy/guardrails.py",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 21,
+   "sub_implemented": 7
   },
   {
    "id": 5,
@@ -77,7 +85,9 @@
    "extension_point": "memory PREFERENCE type",
    "depends_on": [
     9
-   ]
+   ],
+   "sub_capabilities": 17,
+   "sub_implemented": 2
   },
   {
    "id": 6,
@@ -89,7 +99,9 @@
    "extension_point": "jarvis/environments/*",
    "depends_on": [
     12
-   ]
+   ],
+   "sub_capabilities": 25,
+   "sub_implemented": 11
   },
   {
    "id": 7,
@@ -99,7 +111,9 @@
    "status": "B",
    "maturity": "possible_today",
    "extension_point": "environments observe() + voice",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 20,
+   "sub_implemented": 7
   },
   {
    "id": 8,
@@ -111,7 +125,9 @@
    "extension_point": "perception layer",
    "depends_on": [
     7
-   ]
+   ],
+   "sub_capabilities": 11,
+   "sub_implemented": 0
   },
   {
    "id": 9,
@@ -121,7 +137,9 @@
    "status": "B",
    "maturity": "possible_today",
    "extension_point": "jarvis/memory/store.py",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 33,
+   "sub_implemented": 9
   },
   {
    "id": 10,
@@ -133,7 +151,9 @@
    "extension_point": "jarvis/memory/embeddings.py",
    "depends_on": [
     9
-   ]
+   ],
+   "sub_capabilities": 44,
+   "sub_implemented": 7
   },
   {
    "id": 11,
@@ -145,7 +165,9 @@
    "extension_point": "memory store (graph table)",
    "depends_on": [
     9
-   ]
+   ],
+   "sub_capabilities": 25,
+   "sub_implemented": 0
   },
   {
    "id": 12,
@@ -155,7 +177,9 @@
    "status": "B",
    "maturity": "possible_today",
    "extension_point": "jarvis/core/events.py",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 26,
+   "sub_implemented": 9
   },
   {
    "id": 13,
@@ -167,7 +191,9 @@
    "extension_point": "contracts.Goal",
    "depends_on": [
     1
-   ]
+   ],
+   "sub_capabilities": 19,
+   "sub_implemented": 4
   },
   {
    "id": 14,
@@ -180,7 +206,9 @@
    "depends_on": [
     1,
     13
-   ]
+   ],
+   "sub_capabilities": 15,
+   "sub_implemented": 6
   },
   {
    "id": 15,
@@ -193,7 +221,9 @@
    "depends_on": [
     14,
     16
-   ]
+   ],
+   "sub_capabilities": 32,
+   "sub_implemented": 0
   },
   {
    "id": 16,
@@ -203,7 +233,9 @@
    "status": "A",
    "maturity": "possible_today",
    "extension_point": "jarvis/models/router.py",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 19,
+   "sub_implemented": 14
   },
   {
    "id": 17,
@@ -215,7 +247,9 @@
    "extension_point": "jarvis/models/providers.py",
    "depends_on": [
     16
-   ]
+   ],
+   "sub_capabilities": 16,
+   "sub_implemented": 5
   },
   {
    "id": 18,
@@ -227,7 +261,9 @@
    "extension_point": "jarvis/environments/local_os.py + windows_gui.py",
    "depends_on": [
     6
-   ]
+   ],
+   "sub_capabilities": 30,
+   "sub_implemented": 16
   },
   {
    "id": 19,
@@ -239,7 +275,9 @@
    "extension_point": "jarvis/environments/web.py",
    "depends_on": [
     6
-   ]
+   ],
+   "sub_capabilities": 19,
+   "sub_implemented": 10
   },
   {
    "id": 20,
@@ -251,7 +289,9 @@
    "extension_point": "jarvis/environments/web.py",
    "depends_on": [
     19
-   ]
+   ],
+   "sub_capabilities": 20,
+   "sub_implemented": 9
   },
   {
    "id": 21,
@@ -264,7 +304,9 @@
    "depends_on": [
     7,
     18
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 0
   },
   {
    "id": 22,
@@ -276,7 +318,9 @@
    "extension_point": "jarvis/voice/live.py",
    "depends_on": [
     7
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 7
   },
   {
    "id": 23,
@@ -288,7 +332,9 @@
    "extension_point": "abilities + a documents environment",
    "depends_on": [
     7
-   ]
+   ],
+   "sub_capabilities": 26,
+   "sub_implemented": 1
   },
   {
    "id": 24,
@@ -301,7 +347,9 @@
    "depends_on": [
     23,
     25
-   ]
+   ],
+   "sub_capabilities": 14,
+   "sub_implemented": 0
   },
   {
    "id": 25,
@@ -313,7 +361,9 @@
    "extension_point": "new environment adapter",
    "depends_on": [
     12
-   ]
+   ],
+   "sub_capabilities": 20,
+   "sub_implemented": 0
   },
   {
    "id": 26,
@@ -325,7 +375,9 @@
    "extension_point": "skills/library + a repo environment",
    "depends_on": [
     43
-   ]
+   ],
+   "sub_capabilities": 24,
+   "sub_implemented": 2
   },
   {
    "id": 27,
@@ -338,7 +390,9 @@
    "depends_on": [
     26,
     32
-   ]
+   ],
+   "sub_capabilities": 15,
+   "sub_implemented": 0
   },
   {
    "id": 28,
@@ -350,7 +404,9 @@
    "extension_point": "skills/library",
    "depends_on": [
     29
-   ]
+   ],
+   "sub_capabilities": 21,
+   "sub_implemented": 0
   },
   {
    "id": 29,
@@ -362,7 +418,9 @@
    "extension_point": "skills/library + a data environment",
    "depends_on": [
     30
-   ]
+   ],
+   "sub_capabilities": 19,
+   "sub_implemented": 0
   },
   {
    "id": 30,
@@ -372,7 +430,9 @@
    "status": "D",
    "maturity": "possible_today",
    "extension_point": "new environment adapter",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 18,
+   "sub_implemented": 1
   },
   {
    "id": 31,
@@ -384,7 +444,9 @@
    "extension_point": "skills/library + shell",
    "depends_on": [
     26
-   ]
+   ],
+   "sub_capabilities": 17,
+   "sub_implemented": 1
   },
   {
    "id": 32,
@@ -397,7 +459,9 @@
    "depends_on": [
     12,
     31
-   ]
+   ],
+   "sub_capabilities": 18,
+   "sub_implemented": 1
   },
   {
    "id": 33,
@@ -409,7 +473,9 @@
    "extension_point": "new environment adapter",
    "depends_on": [
     31
-   ]
+   ],
+   "sub_capabilities": 18,
+   "sub_implemented": 0
   },
   {
    "id": 34,
@@ -421,7 +487,9 @@
    "extension_point": "local_os + skills/system-admin.md",
    "depends_on": [
     18
-   ]
+   ],
+   "sub_capabilities": 24,
+   "sub_implemented": 9
   },
   {
    "id": 35,
@@ -433,7 +501,9 @@
    "extension_point": "new environment adapter",
    "depends_on": [
     18
-   ]
+   ],
+   "sub_capabilities": 16,
+   "sub_implemented": 0
   },
   {
    "id": 36,
@@ -445,7 +515,9 @@
    "extension_point": "jarvis/policy/ + config/settings.py",
    "depends_on": [
     4
-   ]
+   ],
+   "sub_capabilities": 20,
+   "sub_implemented": 9
   },
   {
    "id": 37,
@@ -457,7 +529,9 @@
    "extension_point": "execution fabric seam",
    "depends_on": [
     36
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 0
   },
   {
    "id": 38,
@@ -469,7 +543,9 @@
    "extension_point": "environments verify()",
    "depends_on": [
     6
-   ]
+   ],
+   "sub_capabilities": 19,
+   "sub_implemented": 10
   },
   {
    "id": 39,
@@ -481,7 +557,9 @@
    "extension_point": "orchestrator recovery path",
    "depends_on": [
     38
-   ]
+   ],
+   "sub_capabilities": 14,
+   "sub_implemented": 6
   },
   {
    "id": 40,
@@ -493,7 +571,9 @@
    "extension_point": "memory FAILURE/EXPERIENCE types",
    "depends_on": [
     9
-   ]
+   ],
+   "sub_capabilities": 11,
+   "sub_implemented": 4
   },
   {
    "id": 41,
@@ -506,7 +586,9 @@
    "depends_on": [
     43,
     21
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 0
   },
   {
    "id": 42,
@@ -518,7 +600,9 @@
    "extension_point": "events.jsonl",
    "depends_on": [
     12
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 0
   },
   {
    "id": 43,
@@ -530,7 +614,9 @@
    "extension_point": "jarvis/skills/registry.py",
    "depends_on": [
     9
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 5
   },
   {
    "id": 44,
@@ -542,7 +628,9 @@
    "extension_point": "abilities registry",
    "depends_on": [
     94
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 1
   },
   {
    "id": 45,
@@ -552,7 +640,9 @@
    "status": "A",
    "maturity": "possible_today",
    "extension_point": "jarvis/abilities/registry.py",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 12,
+   "sub_implemented": 8
   },
   {
    "id": 46,
@@ -565,7 +655,9 @@
    "depends_on": [
     45,
     36
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 0
   },
   {
    "id": 47,
@@ -575,7 +667,9 @@
    "status": "D",
    "maturity": "possible_today",
    "extension_point": "new fabric module",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 20,
+   "sub_implemented": 0
   },
   {
    "id": 48,
@@ -587,7 +681,9 @@
    "extension_point": "jarvis/models/router.py",
    "depends_on": [
     16
-   ]
+   ],
+   "sub_capabilities": 15,
+   "sub_implemented": 8
   },
   {
    "id": 49,
@@ -600,7 +696,9 @@
    "depends_on": [
     47,
     9
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 0
   },
   {
    "id": 50,
@@ -613,7 +711,9 @@
    "depends_on": [
     12,
     51
-   ]
+   ],
+   "sub_capabilities": 16,
+   "sub_implemented": 0
   },
   {
    "id": 51,
@@ -623,7 +723,9 @@
    "status": "D",
    "maturity": "possible_today",
    "extension_point": "notification layer",
-   "depends_on": []
+   "depends_on": [],
+   "sub_capabilities": 8,
+   "sub_implemented": 0
   },
   {
    "id": 52,
@@ -635,7 +737,9 @@
    "extension_point": "event subscriber",
    "depends_on": [
     50
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 0
   },
   {
    "id": 53,
@@ -647,7 +751,9 @@
    "extension_point": "memory PROJECT type",
    "depends_on": [
     13
-   ]
+   ],
+   "sub_capabilities": 16,
+   "sub_implemented": 0
   },
   {
    "id": 54,
@@ -659,7 +765,9 @@
    "extension_point": "memory ORGANIZATIONAL type",
    "depends_on": [
     11
-   ]
+   ],
+   "sub_capabilities": 17,
+   "sub_implemented": 0
   },
   {
    "id": 55,
@@ -672,7 +780,9 @@
    "depends_on": [
     54,
     11
-   ]
+   ],
+   "sub_capabilities": 6,
+   "sub_implemented": 0
   },
   {
    "id": 56,
@@ -684,7 +794,9 @@
    "extension_point": "memory DECISION type",
    "depends_on": [
     9
-   ]
+   ],
+   "sub_capabilities": 10,
+   "sub_implemented": 1
   },
   {
    "id": 57,
@@ -696,7 +808,9 @@
    "extension_point": "Ability.risk + policy gate",
    "depends_on": [
     4
-   ]
+   ],
+   "sub_capabilities": 10,
+   "sub_implemented": 4
   },
   {
    "id": 58,
@@ -708,7 +822,9 @@
    "extension_point": "execution fabric seam",
    "depends_on": [
     37
-   ]
+   ],
+   "sub_capabilities": 8,
+   "sub_implemented": 0
   },
   {
    "id": 59,
@@ -721,7 +837,9 @@
    "depends_on": [
     6,
     12
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 0
   },
   {
    "id": 60,
@@ -733,7 +851,9 @@
    "extension_point": "skills/library + research memory",
    "depends_on": [
     20
-   ]
+   ],
+   "sub_capabilities": 12,
+   "sub_implemented": 0
   },
   {
    "id": 61,
@@ -745,7 +865,9 @@
    "extension_point": "new environment adapter",
    "depends_on": [
     7
-   ]
+   ],
+   "sub_capabilities": 12,
+   "sub_implemented": 0
   },
   {
    "id": 62,
@@ -757,7 +879,9 @@
    "extension_point": "model fabric",
    "depends_on": [
     16
-   ]
+   ],
+   "sub_capabilities": 10,
+   "sub_implemented": 2
   },
   {
    "id": 63,
@@ -769,7 +893,9 @@
    "extension_point": "skills + python execution",
    "depends_on": [
     29
-   ]
+   ],
+   "sub_capabilities": 10,
+   "sub_implemented": 0
   },
   {
    "id": 64,
@@ -781,7 +907,9 @@
    "extension_point": "memory + scheduler",
    "depends_on": [
     9
-   ]
+   ],
+   "sub_capabilities": 13,
+   "sub_implemented": 2
   },
   {
    "id": 65,
@@ -794,7 +922,9 @@
    "depends_on": [
     24,
     4
-   ]
+   ],
+   "sub_capabilities": 7,
+   "sub_implemented": 0
   },
   {
    "id": 66,
@@ -806,7 +936,9 @@
    "extension_point": "events.jsonl audit trail",
    "depends_on": [
     87
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 3
   },
   {
    "id": 67,
@@ -819,7 +951,9 @@
    "depends_on": [
     10,
     11
-   ]
+   ],
+   "sub_capabilities": 11,
+   "sub_implemented": 2
   },
   {
    "id": 68,
@@ -831,7 +965,9 @@
    "extension_point": "event subscriber",
    "depends_on": [
     67
-   ]
+   ],
+   "sub_capabilities": 8,
+   "sub_implemented": 0
   },
   {
    "id": 69,
@@ -843,7 +979,9 @@
    "extension_point": "events.jsonl + benchmark.py",
    "depends_on": [
     12
-   ]
+   ],
+   "sub_capabilities": 12,
+   "sub_implemented": 6
   },
   {
    "id": 70,
@@ -855,7 +993,9 @@
    "extension_point": "jarvis/benchmark.py + stress.py",
    "depends_on": [
     69
-   ]
+   ],
+   "sub_capabilities": 8,
+   "sub_implemented": 4
   },
   {
    "id": 71,
@@ -867,7 +1007,9 @@
    "extension_point": "jarvis/benchmark.py",
    "depends_on": [
     70
-   ]
+   ],
+   "sub_capabilities": 6,
+   "sub_implemented": 4
   },
   {
    "id": 72,
@@ -880,7 +1022,9 @@
    "depends_on": [
     40,
     70
-   ]
+   ],
+   "sub_capabilities": 15,
+   "sub_implemented": 0
   },
   {
    "id": 73,
@@ -892,7 +1036,9 @@
    "extension_point": "circuit breaker + failover",
    "depends_on": [
     39
-   ]
+   ],
+   "sub_capabilities": 10,
+   "sub_implemented": 5
   },
   {
    "id": 74,
@@ -905,7 +1051,9 @@
    "depends_on": [
     13,
     39
-   ]
+   ],
+   "sub_capabilities": 15,
+   "sub_implemented": 0
   },
   {
    "id": 75,
@@ -918,7 +1066,9 @@
    "depends_on": [
     13,
     9
-   ]
+   ],
+   "sub_capabilities": 7,
+   "sub_implemented": 4
   },
   {
    "id": 76,
@@ -930,7 +1080,9 @@
    "extension_point": "process mining",
    "depends_on": [
     42
-   ]
+   ],
+   "sub_capabilities": 7,
+   "sub_implemented": 0
   },
   {
    "id": 77,
@@ -943,7 +1095,9 @@
    "depends_on": [
     5,
     9
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 0
   },
   {
    "id": 78,
@@ -955,7 +1109,9 @@
    "extension_point": "organizational intelligence",
    "depends_on": [
     54
-   ]
+   ],
+   "sub_capabilities": 11,
+   "sub_implemented": 0
   },
   {
    "id": 79,
@@ -967,7 +1123,9 @@
    "extension_point": "memory PREFERENCE type",
    "depends_on": [
     5
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 1
   },
   {
    "id": 80,
@@ -980,7 +1138,9 @@
    "depends_on": [
     4,
     57
-   ]
+   ],
+   "sub_capabilities": 14,
+   "sub_implemented": 6
   },
   {
    "id": 81,
@@ -992,7 +1152,9 @@
    "extension_point": "answer synthesis",
    "depends_on": [
     80
-   ]
+   ],
+   "sub_capabilities": 5,
+   "sub_implemented": 2
   },
   {
    "id": 82,
@@ -1004,7 +1166,9 @@
    "extension_point": "jarvis/core/events.py + RouteTrace",
    "depends_on": [
     12
-   ]
+   ],
+   "sub_capabilities": 17,
+   "sub_implemented": 11
   },
   {
    "id": 83,
@@ -1017,7 +1181,9 @@
    "depends_on": [
     82,
     36
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 5
   },
   {
    "id": 84,
@@ -1029,7 +1195,9 @@
    "extension_point": "router resource guards",
    "depends_on": [
     48
-   ]
+   ],
+   "sub_capabilities": 10,
+   "sub_implemented": 6
   },
   {
    "id": 85,
@@ -1041,7 +1209,9 @@
    "extension_point": "router free/metered tiers",
    "depends_on": [
     84
-   ]
+   ],
+   "sub_capabilities": 6,
+   "sub_implemented": 3
   },
   {
    "id": 86,
@@ -1054,7 +1224,9 @@
    "depends_on": [
     4,
     16
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 6
   },
   {
    "id": 87,
@@ -1066,7 +1238,9 @@
    "extension_point": "events.jsonl + traces.jsonl",
    "depends_on": [
     82
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 7
   },
   {
    "id": 88,
@@ -1079,7 +1253,9 @@
    "depends_on": [
     43,
     37
-   ]
+   ],
+   "sub_capabilities": 10,
+   "sub_implemented": 0
   },
   {
    "id": 89,
@@ -1092,7 +1268,9 @@
    "depends_on": [
     45,
     37
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 0
   },
   {
    "id": 90,
@@ -1104,7 +1282,9 @@
    "extension_point": "Environment protocol",
    "depends_on": [
     6
-   ]
+   ],
+   "sub_capabilities": 8,
+   "sub_implemented": 1
   },
   {
    "id": 91,
@@ -1116,7 +1296,9 @@
    "extension_point": "Environment protocol",
    "depends_on": [
     90
-   ]
+   ],
+   "sub_capabilities": 9,
+   "sub_implemented": 0
   },
   {
    "id": 92,
@@ -1129,7 +1311,9 @@
    "depends_on": [
     2,
     47
-   ]
+   ],
+   "sub_capabilities": 7,
+   "sub_implemented": 0
   },
   {
    "id": 93,
@@ -1142,7 +1326,9 @@
    "depends_on": [
     47,
     48
-   ]
+   ],
+   "sub_capabilities": 8,
+   "sub_implemented": 0
   },
   {
    "id": 94,
@@ -1155,7 +1341,9 @@
    "depends_on": [
     6,
     10
-   ]
+   ],
+   "sub_capabilities": 12,
+   "sub_implemented": 0
   },
   {
    "id": 95,
@@ -1167,7 +1355,9 @@
    "extension_point": "Ability schema",
    "depends_on": [
     45
-   ]
+   ],
+   "sub_capabilities": 24,
+   "sub_implemented": 6
   },
   {
    "id": 96,
@@ -1179,7 +1369,9 @@
    "extension_point": "contracts.Goal + Plan + Step",
    "depends_on": [
     13
-   ]
+   ],
+   "sub_capabilities": 14,
+   "sub_implemented": 9
   },
   {
    "id": 97,
@@ -1192,7 +1384,9 @@
    "depends_on": [
     44,
     2
-   ]
+   ],
+   "sub_capabilities": 7,
+   "sub_implemented": 3
   },
   {
    "id": 98,
@@ -1204,7 +1398,9 @@
    "extension_point": "evaluation harness",
    "depends_on": [
     70
-   ]
+   ],
+   "sub_capabilities": 8,
+   "sub_implemented": 0
   },
   {
    "id": 99,
@@ -1217,7 +1413,9 @@
    "depends_on": [
     6,
     9
-   ]
+   ],
+   "sub_capabilities": 11,
+   "sub_implemented": 5
   },
   {
    "id": 100,
@@ -1233,7 +1431,9 @@
     6,
     9,
     16
-   ]
+   ],
+   "sub_capabilities": 21,
+   "sub_implemented": 4
   },
   {
    "id": 101,
@@ -1247,7 +1447,10 @@
     45,
     43,
     16
-   ]
+   ],
+   "sub_capabilities": 12,
+   "sub_implemented": 7
   }
- ]
+ ],
+ "_depth_note": "sub_capabilities counts the individual capabilities the vision document lists under each pack. Pack-level percentages overstate progress badly, because a pack is a discipline rather than a feature; capability-level counting is the honest measure."
 }

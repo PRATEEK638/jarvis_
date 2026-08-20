@@ -83,10 +83,23 @@ def coverage() -> dict[str, object]:
             "percent": round(100 * done / max(1, len(members))),
         }
     implemented = sum(1 for p in packs if p.implemented)
+
+    # Pack-level percentage flatters the truth: a pack is a discipline, not a
+    # feature. "AI/ML Engineering" is one entry covering nineteen separate
+    # capabilities. Counting capabilities is the honest measure, and even that
+    # overstates it, because the unbuilt remainder is the hard part - learning
+    # from demonstration, capability discovery, multi-agent work and judgement
+    # are all at zero while the mechanical capabilities are the ones done.
+    subs_total = sum(p.sub_capabilities for p in packs)
+    subs_done = sum(p.sub_implemented for p in packs)
+
     return {
         "total_packs": len(packs),
         "implemented_or_partial": implemented,
         "percent": round(100 * implemented / max(1, len(packs))),
+        "capabilities_total": subs_total,
+        "capabilities_built": subs_done,
+        "capability_percent": round(100 * subs_done / max(1, subs_total), 1),
         "by_status": {
             "A_implemented": counts.get("A", 0),
             "B_partial": counts.get("B", 0),

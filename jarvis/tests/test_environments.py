@@ -146,9 +146,18 @@ class TestMemory:
         with pytest.raises(NotImplementedError):
             store.remember("x", memory_type=MemoryType.PROCEDURAL)
 
-    def test_only_three_types_are_claimed(self):
+    def test_implemented_types_are_exactly_what_is_claimed(self):
+        """The set is asserted explicitly so enabling a type is a deliberate
+        act with a test change, never an accident that silently claims a
+        capability the store cannot really serve."""
         assert IMPLEMENTED_MEMORY_TYPES == {
-            MemoryType.WORKING, MemoryType.EPISODIC, MemoryType.SEMANTIC}
+            MemoryType.WORKING, MemoryType.EPISODIC, MemoryType.SEMANTIC,
+            MemoryType.FAILURE, MemoryType.COMMITMENT, MemoryType.DECISION}
+
+    def test_the_majority_of_declared_types_remain_unimplemented(self):
+        """Guards the honesty claim: most of the vision's 20 memory types are
+        still not built, and the store must keep saying so."""
+        assert len(IMPLEMENTED_MEMORY_TYPES) < len(list(MemoryType)) / 2
 
     def test_working_memory_is_bounded(self):
         wm = WorkingMemory(max_items=3)

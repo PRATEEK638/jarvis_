@@ -19,7 +19,7 @@ import time
 from typing import Any, Callable
 
 from jarvis.abilities import registry
-from jarvis.core import coverage, fastpath, planner
+from jarvis.core import commitments, coverage, fastpath, planner
 from jarvis.core.contracts import (
     ActionResult,
     Category,
@@ -64,6 +64,8 @@ class Orchestrator:
         self.store = store or MemoryStore()
         self.confirm = confirm or always_allow
         self.working = WorkingMemory()
+        # What JARVIS still owes the user, carried across restarts.
+        self.commitments = commitments.CommitmentBook(self.store)
         self._progress = on_progress or (lambda _msg: None)
 
         self.local_os = LocalOSEnvironment()
@@ -212,6 +214,17 @@ class Orchestrator:
             parts.append(f"Known facts that may be relevant: {facts}")
         state = self.local_os.state()
         parts.append(f"User home directory: {state['home']}")
+
+        # Closing the learning loop: a failure is only worth remembering if it
+        # changes the next plan, so previous failures at similar work are put
+        # in front of the planner rather than merely logged.
+        warnings = commitments.past_failures(self.store, objective, limit=3)
+        if warnings:
+            joined = "\n  - ".join(warnings)
+            parts.append(
+                "Previous attempts at similar work FAILED as follows - do not "
+                f"repeat the same approach blindly:\n  - {joined}")
+
         if self.working.context():
             parts.append(f"Earlier in this session:\n{self.working.context()}")
         return "\n".join(parts)
@@ -522,6 +535,19 @@ class Orchestrator:
         record = TaskRecord(goal=goal, plan=plan, trace=trace, ok=ok,
                             message=message)
         self.store.record_task(record)
+
+        # Learn from what went wrong, so the same approach is not retried
+        # blindly next time (vision packs 40, 55, 56).
+        for step in plan.steps:
+            if step.status in ("failed", "denied") and step.result is not None:
+                commitments.record_failure(
+                    self.store, objective=goal.objective,
+                    ability=step.ability,
+                    error=step.result.summary or step.result.error or "")
+
+        # If the answer contained a promise, hold JARVIS to it (pack 75).
+        if message:
+            self.commitments.record(message, context=goal.objective)
         emit_trace(trace)
         emit("goal.finished", goal_id=goal.id, ok=ok, status=goal.status,
              total_ms=trace.total_ms)

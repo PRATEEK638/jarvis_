@@ -87,6 +87,12 @@ class Pack(BaseModel):
     learning: str = ""
     evaluation: str = ""
 
+    # A pack is a discipline, not a feature: the vision lists many individual
+    # capabilities under each heading. Recording both numbers keeps progress
+    # honest, because counting headings badly overstates it.
+    sub_capabilities: int = 0
+    sub_implemented: int = 0
+
     # Free-text, only where there is something honest to say.
     notes: str = ""
 

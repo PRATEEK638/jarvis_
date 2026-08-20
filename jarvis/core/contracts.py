@@ -246,6 +246,9 @@ IMPLEMENTED_MEMORY_TYPES = {
     MemoryType.WORKING,
     MemoryType.EPISODIC,
     MemoryType.SEMANTIC,
+    MemoryType.FAILURE,      # what went wrong, and why - so it is not repeated
+    MemoryType.COMMITMENT,   # what JARVIS still owes the user
+    MemoryType.DECISION,     # what was chosen, and on what evidence
 }
 
 
