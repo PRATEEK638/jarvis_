@@ -197,6 +197,44 @@ ABILITIES: list[Ability] = [
         params={"query": "what to recall"}, required=["query"],
         risk=Risk.LOW, verification="result_only",
     ),
+
+    # -- git repositories ---------------------------------------------------
+    # All read-only. Committing, pushing and checking out are deliberately
+    # absent: they need their own verification and risk tier rather than
+    # inheriting LOW from their read-only neighbours.
+    Ability(
+        id="repo_status", category=Category.SYSTEM, environment="repo",
+        objective="Report a git repository's branch, changed files and "
+                  "how far ahead or behind its upstream it is.",
+        params={"path": "repository folder (default: current project)"},
+        risk=Risk.LOW, verification="records_returned",
+        failure_modes=["not a git repository", "git not installed"],
+    ),
+    Ability(
+        id="repo_log", category=Category.SYSTEM, environment="repo",
+        objective="List recent commits with author, age and subject.",
+        params={"path": "repository folder", "count": "how many (default 10)"},
+        risk=Risk.LOW, verification="records_returned",
+    ),
+    Ability(
+        id="repo_diff", category=Category.SYSTEM, environment="repo",
+        objective="Summarise uncommitted changes in a repository.",
+        params={"path": "repository folder"},
+        risk=Risk.LOW, verification="records_returned",
+    ),
+    Ability(
+        id="repo_branches", category=Category.SYSTEM, environment="repo",
+        objective="List local and remote branches of a repository.",
+        params={"path": "repository folder"},
+        risk=Risk.LOW, verification="records_returned",
+    ),
+    Ability(
+        id="repo_search", category=Category.FILE_SEARCH, environment="repo",
+        objective="Search the tracked source of a repository for a string, "
+                  "skipping build output and ignored files.",
+        params={"query": "text to search for", "path": "repository folder"},
+        required=["query"], risk=Risk.LOW, verification="records_returned",
+    ),
 ]
 
 _BY_ID = {a.id: a for a in ABILITIES}

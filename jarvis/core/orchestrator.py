@@ -35,6 +35,7 @@ from jarvis.core.contracts import (
 )
 from jarvis.core.events import emit, emit_trace
 from jarvis.environments.local_os import LocalOSEnvironment
+from jarvis.environments.repo import RepoEnvironment
 from jarvis.environments.web import WebEnvironment
 from jarvis.environments.windows_gui import WindowsGUIEnvironment
 from jarvis.memory.store import MemoryStore, WorkingMemory
@@ -71,10 +72,12 @@ class Orchestrator:
         self.local_os = LocalOSEnvironment()
         self.gui = WindowsGUIEnvironment()
         self.web = WebEnvironment()
+        self.repo = RepoEnvironment()
         self.environments = {
             self.local_os.id: self.local_os,
             self.gui.id: self.gui,
             self.web.id: self.web,
+            self.repo.id: self.repo,
         }
 
     # -- public ------------------------------------------------------------

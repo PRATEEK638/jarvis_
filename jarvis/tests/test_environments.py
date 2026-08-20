@@ -165,3 +165,52 @@ class TestMemory:
             wm.add(f"note {i}")
         assert wm.context().count("\n") == 2  # exactly 3 lines retained
         assert "note 9" in wm.context() and "note 0" not in wm.context()
+
+
+class TestRepoEnvironment:
+    """The fourth environment. Its real purpose is to test the architecture's
+    central claim (vision Part 70/72): that only the adapter changes. It cost
+    205 lines and 3 lines of core change, against 600 for the first."""
+
+    @pytest.fixture
+    def env(self):
+        from jarvis.environments.repo import RepoEnvironment
+        return RepoEnvironment()
+
+    def test_conforms_to_the_environment_protocol(self, env):
+        for method in ("state", "capabilities", "constraints", "act", "verify"):
+            assert callable(getattr(env, method)), f"missing {method}()"
+        assert env.id == "repo"
+
+    def test_declares_its_own_limits(self, env):
+        limits = " ".join(env.constraints()).lower()
+        assert "read-only" in limits, "must declare that it cannot write"
+
+    def test_reports_state_of_this_repository(self, env):
+        state = env.state()
+        assert "available" in state
+        if state["available"]:
+            assert "branch" in state and "clean" in state
+
+    def test_unknown_ability_is_refused_not_guessed(self, env):
+        result = env.act("repo_force_push", {})
+        assert not result.ok
+        assert result.error == "unregistered"
+
+    def test_a_non_repository_is_reported_honestly(self, env, tmp_path):
+        result = env.act("repo_status", {"path": str(tmp_path)})
+        assert not result.ok
+        assert result.error in ("not_a_repo", "not_found")
+
+    def test_search_without_a_query_is_refused(self, env):
+        result = env.act("repo_search", {})
+        assert not result.ok
+        assert result.error == "missing_query"
+
+    def test_write_abilities_are_deliberately_absent(self, env):
+        """Committing and pushing must not sneak in at LOW risk alongside
+        their read-only neighbours."""
+        caps = set(env.capabilities())
+        for dangerous in ("repo_commit", "repo_push", "repo_checkout",
+                          "repo_reset"):
+            assert dangerous not in caps
