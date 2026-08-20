@@ -6,6 +6,7 @@ REM   JARVIS.bat --web        the browser control interface, at localhost:8731
 REM   JARVIS.bat --voice      talk to it
 REM   JARVIS.bat --status     what is available right now
 REM   JARVIS.bat --progress   how much of the vision is actually built
+REM   JARVIS.bat --latency    where the time actually goes (p50/p90/p99)
 REM   JARVIS.bat "create a folder called reports on my desktop"
 
 setlocal
@@ -51,6 +52,12 @@ if "%~1"=="" (
 
 if "%~1"=="--progress" (
     ".venv\Scripts\python.exe" -m jarvis.progress
+    pause
+    goto :eof
+)
+
+if "%~1"=="--latency" (
+    ".venv\Scripts\python.exe" -m jarvis.latency
     pause
     goto :eof
 )

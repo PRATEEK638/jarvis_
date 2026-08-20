@@ -228,6 +228,18 @@ ABILITIES: list[Ability] = [
         params={"path": "repository folder"},
         risk=Risk.LOW, verification="records_returned",
     ),
+    # -- deep reasoning ---------------------------------------------------------
+    Ability(
+        id="think_harder", category=Category.WEB_INFO, environment="delegate",
+        objective="Hand a genuinely hard question to a stronger model and "
+                  "return an answer shaped for speech. Use when the question "
+                  "needs real reasoning rather than a conversational reply.",
+        params={"question": "the question to think about",
+                "context": "anything already established that matters"},
+        required=["question"], risk=Risk.LOW, verification="answer_returned",
+        failure_modes=["no strong route reachable", "adds seconds of latency"],
+    ),
+
     # -- learned file resolution ----------------------------------------------
     Ability(
         id="resolve_file", category=Category.FILE_SEARCH, environment="local_os",

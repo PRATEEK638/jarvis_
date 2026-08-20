@@ -23,6 +23,7 @@ import base64
 import json
 import queue
 import threading
+import time
 from typing import Any, AsyncIterator, Callable
 
 from jarvis.abilities import registry as ability_registry
@@ -57,6 +58,12 @@ failure, say so; never claim success you were not told about.
 
 Do not narrate your reasoning or announce which tool you are about to use.
 Act, then report.
+
+For a question that needs real reasoning rather than a quick reply - a
+comparison, a judgement, a trade-off, an explanation of something subtle - call
+think_harder instead of answering from your own first instinct. It takes a few
+seconds and returns a better answer. Do not use it for anything you already
+know well, and never for a simple lookup.
 
 CRITICAL - the microphone is always open, so you will hear things that are not
 addressed to you: background conversation, video or music playback, typing, and
@@ -448,7 +455,7 @@ class VoiceSession:
     _SLOW_ABILITIES = {
         "research", "web_search", "fetch_page", "find_files",
         "search_in_files", "run_python", "run_powershell", "run_command",
-        "read_document", "repo_search", "resolve_file",
+        "read_document", "repo_search", "resolve_file", "think_harder",
     }
     PREAMBLE_AFTER_S = 0.7
 
@@ -464,20 +471,32 @@ class VoiceSession:
         after a short delay, so a fast call is not padded with a pointless
         "one moment" that makes it feel slower than it is.
         """
-        responses = []
+        # Calls run concurrently. "Check my calendar and the weather" has no
+        # reason to pay for one then the other, and the model issues them
+        # together precisely because they are independent. Sequential
+        # execution made the wait the sum of the parts instead of the slowest.
+        started = time.perf_counter()
+        tasks = []
         for call in calls:
             name = call.get("name", "")
             args = call.get("args") or {}
             self._on_event("action", f"{name} {json.dumps(args, default=str)[:90]}")
             emit("voice.tool_call", ability=name, args=args)
+            tasks.append((call, asyncio.create_task(
+                asyncio.to_thread(self._execute, name, args))))
 
-            task = asyncio.create_task(
-                asyncio.to_thread(self._execute, name, args))
-            if name in self._SLOW_ABILITIES:
-                done, _ = await asyncio.wait({task},
-                                             timeout=self.PREAMBLE_AFTER_S)
-                if not done:
-                    await self._speak_preamble(ws, name)
+        # One preamble for the whole batch, not one per call - three
+        # acknowledgements in a row is worse than none.
+        if any(c.get("name") in self._SLOW_ABILITIES for c, _ in tasks):
+            done, _ = await asyncio.wait({t for _, t in tasks},
+                                         timeout=self.PREAMBLE_AFTER_S)
+            if len(done) < len(tasks):
+                slow = next(c.get("name") for c, t in tasks
+                            if t not in done)
+                await self._speak_preamble(ws, slow)
+
+        responses = []
+        for call, task in tasks:
             try:
                 result = await task
             except Exception as exc:                      # noqa: BLE001
@@ -485,9 +504,11 @@ class VoiceSession:
             self._on_event("result", result[:200])
             responses.append({
                 "id": call.get("id"),
-                "name": name,
+                "name": call.get("name", ""),
                 "response": {"result": result},
             })
+        emit("voice.tools_finished", count=len(tasks),
+             ms=int((time.perf_counter() - started) * 1000))
         await ws.send(json.dumps({"toolResponse": {"functionResponses": responses}}))
 
     async def _speak_preamble(self, ws, ability: str) -> None:
@@ -506,6 +527,7 @@ class VoiceSession:
             "search_in_files": "Searching inside your files.",
             "read_document": "Reading it now.",
             "repo_search": "Searching the repository.",
+            "think_harder": "Let me think about that properly.",
         }.get(ability, "One moment.")
         emit("voice.preamble", ability=ability)
         self._on_event("jarvis", line)

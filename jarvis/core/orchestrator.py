@@ -35,6 +35,7 @@ from jarvis.core.contracts import (
 )
 from jarvis.core.events import emit, emit_trace
 from jarvis.environments.code import CodeEnvironment
+from jarvis.voice.delegate import DelegateEnvironment
 from jarvis.environments.documents import DocumentEnvironment
 from jarvis.environments.hardware import HardwareEnvironment
 from jarvis.environments.local_os import LocalOSEnvironment
@@ -88,6 +89,7 @@ class Orchestrator:
         self.hardware = HardwareEnvironment()
         self.documents = DocumentEnvironment()
         self.code = CodeEnvironment()
+        self.delegate = DelegateEnvironment()
         self.environments = {
             self.local_os.id: self.local_os,
             self.gui.id: self.gui,
@@ -96,6 +98,7 @@ class Orchestrator:
             self.hardware.id: self.hardware,
             self.documents.id: self.documents,
             self.code.id: self.code,
+            self.delegate.id: self.delegate,
         }
 
     # -- public ------------------------------------------------------------
