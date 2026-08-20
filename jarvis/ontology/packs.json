@@ -46,7 +46,7 @@
     1
    ],
    "sub_capabilities": 19,
-   "sub_implemented": 7
+   "sub_implemented": 9
   },
   {
    "id": 3,
@@ -61,7 +61,7 @@
     4
    ],
    "sub_capabilities": 18,
-   "sub_implemented": 6
+   "sub_implemented": 12
   },
   {
    "id": 4,
@@ -73,7 +73,7 @@
    "extension_point": "jarvis/policy/guardrails.py",
    "depends_on": [],
    "sub_capabilities": 21,
-   "sub_implemented": 7
+   "sub_implemented": 9
   },
   {
    "id": 5,
@@ -139,7 +139,7 @@
    "extension_point": "jarvis/memory/store.py",
    "depends_on": [],
    "sub_capabilities": 33,
-   "sub_implemented": 9
+   "sub_implemented": 12
   },
   {
    "id": 10,
@@ -153,7 +153,7 @@
     9
    ],
    "sub_capabilities": 44,
-   "sub_implemented": 7
+   "sub_implemented": 16
   },
   {
    "id": 11,
@@ -235,7 +235,7 @@
    "extension_point": "jarvis/models/router.py",
    "depends_on": [],
    "sub_capabilities": 19,
-   "sub_implemented": 14
+   "sub_implemented": 15
   },
   {
    "id": 17,
@@ -263,7 +263,7 @@
     6
    ],
    "sub_capabilities": 30,
-   "sub_implemented": 16
+   "sub_implemented": 22
   },
   {
    "id": 19,
@@ -327,14 +327,14 @@
    "name": "Document Intelligence",
    "subsystem": "knowledge",
    "purpose": "PDF/DOCX/XLSX parsing, tables, layout, generation",
-   "status": "D",
+   "status": "C",
    "maturity": "possible_today",
    "extension_point": "abilities + a documents environment",
    "depends_on": [
     7
    ],
    "sub_capabilities": 26,
-   "sub_implemented": 1
+   "sub_implemented": 14
   },
   {
    "id": 24,
@@ -377,7 +377,7 @@
     43
    ],
    "sub_capabilities": 24,
-   "sub_implemented": 2
+   "sub_implemented": 6
   },
   {
    "id": 27,
@@ -489,7 +489,7 @@
     18
    ],
    "sub_capabilities": 24,
-   "sub_implemented": 9
+   "sub_implemented": 14
   },
   {
    "id": 35,
@@ -524,14 +524,14 @@
    "name": "Sandbox / Execution Security",
    "subsystem": "safety",
    "purpose": "Containers, VMs, isolation, resource limits",
-   "status": "D",
+   "status": "C",
    "maturity": "engineering_ready",
    "extension_point": "execution fabric seam",
    "depends_on": [
     36
    ],
    "sub_capabilities": 13,
-   "sub_implemented": 0
+   "sub_implemented": 2
   },
   {
    "id": 38,
@@ -559,7 +559,7 @@
     38
    ],
    "sub_capabilities": 14,
-   "sub_implemented": 6
+   "sub_implemented": 7
   },
   {
    "id": 40,
@@ -573,7 +573,7 @@
     9
    ],
    "sub_capabilities": 11,
-   "sub_implemented": 4
+   "sub_implemented": 7
   },
   {
    "id": 41,
@@ -616,7 +616,7 @@
     9
    ],
    "sub_capabilities": 13,
-   "sub_implemented": 5
+   "sub_implemented": 7
   },
   {
    "id": 44,
@@ -642,7 +642,7 @@
    "extension_point": "jarvis/abilities/registry.py",
    "depends_on": [],
    "sub_capabilities": 12,
-   "sub_implemented": 8
+   "sub_implemented": 10
   },
   {
    "id": 46,
@@ -810,7 +810,7 @@
     4
    ],
    "sub_capabilities": 10,
-   "sub_implemented": 4
+   "sub_implemented": 6
   },
   {
    "id": 58,
@@ -1016,7 +1016,7 @@
    "name": "Self-Improvement",
    "subsystem": "learning",
    "purpose": "Observe-measure-diagnose-test-promote or reject",
-   "status": "D",
+   "status": "C",
    "maturity": "needs_research",
    "extension_point": "learning engine",
    "depends_on": [
@@ -1024,7 +1024,7 @@
     70
    ],
    "sub_capabilities": 15,
-   "sub_implemented": 0
+   "sub_implemented": 2
   },
   {
    "id": 73,
@@ -1060,7 +1060,7 @@
    "name": "Commitment / Follow-Through",
    "subsystem": "autonomy",
    "purpose": "Promises, pending actions, waiting states",
-   "status": "D",
+   "status": "C",
    "maturity": "possible_today",
    "extension_point": "memory COMMITMENT type",
    "depends_on": [
@@ -1068,7 +1068,7 @@
     9
    ],
    "sub_capabilities": 7,
-   "sub_implemented": 4
+   "sub_implemented": 5
   },
   {
    "id": 76,
@@ -1140,7 +1140,7 @@
     57
    ],
    "sub_capabilities": 14,
-   "sub_implemented": 6
+   "sub_implemented": 8
   },
   {
    "id": 81,
@@ -1357,7 +1357,7 @@
     45
    ],
    "sub_capabilities": 24,
-   "sub_implemented": 6
+   "sub_implemented": 9
   },
   {
    "id": 96,
@@ -1449,7 +1449,7 @@
     16
    ],
    "sub_capabilities": 12,
-   "sub_implemented": 7
+   "sub_implemented": 9
   }
  ],
  "_depth_note": "sub_capabilities counts the individual capabilities the vision document lists under each pack. Pack-level percentages overstate progress badly, because a pack is a discipline rather than a feature; capability-level counting is the honest measure."
