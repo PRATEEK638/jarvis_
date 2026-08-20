@@ -28,16 +28,23 @@ LMSTUDIO_URL = os.environ.get("JARVIS_LMSTUDIO_URL", "http://localhost:1234/v1")
 EMBED_MODEL = os.environ.get("JARVIS_EMBED_MODEL",
                              "text-embedding-nomic-embed-text-v1.5")
 
-# Local inference is OFF by default. This was measured, not assumed: llama3:8b
-# emitted an invalid plan for "find which files mention X and tell me what it
-# does", and a single-step plan for "why is my pc slow" where the 550B route
-# correctly produced two. The weakest model was setting the ceiling for the
-# whole system. Set JARVIS_LOCAL_ENABLED=1 to put it back.
-#
-# The trade-off is real: with local off, a request mentioning a file path sends
-# that path to a cloud provider, so the on-device privacy guarantee no longer
-# holds for planning.
-LOCAL_ENABLED = os.environ.get("JARVIS_LOCAL_ENABLED", "0") not in ("0", "", "false", "False")
+# Whether local inference is used is decided per machine, not globally: the
+# laptop has 16 GB and cannot hold a 7B model alongside normal work, while the
+# workstation has 32 GB and can. See config/machine.py for the measurement.
+# JARVIS_LOCAL_ENABLED=1/0 overrides it explicitly.
+def _local_enabled() -> bool:
+    from jarvis.config import machine
+    return machine.local_enabled()
+
+
+class _LazyLocalFlag:
+    """Evaluated on use so importing settings never probes the hardware."""
+
+    def __bool__(self) -> bool:
+        return _local_enabled()
+
+
+LOCAL_ENABLED = _LazyLocalFlag()
 
 # Cloud tier -----------------------------------------------------------------
 CLOUD_PROVIDERS = ("gemini", "openrouter", "nvidia", "sarvam", "openai", "anthropic")
