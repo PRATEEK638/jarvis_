@@ -228,6 +228,29 @@ ABILITIES: list[Ability] = [
         params={"path": "repository folder"},
         risk=Risk.LOW, verification="records_returned",
     ),
+    # -- documents ----------------------------------------------------------
+    # Read-only. Writing documents is a separate, riskier capability: a
+    # malformed write silently corrupts something hard to reconstruct.
+    Ability(
+        id="read_document", category=Category.FILE_SEARCH,
+        environment="documents",
+        objective="Read the text inside a PDF, Word, Excel, CSV or text file.",
+        params={"path": "the document to read",
+                "pages": "PDF only: page range like 1-5",
+                "sheet": "Excel only: sheet name"},
+        required=["path"], risk=Risk.LOW, verification="text_extracted",
+        failure_modes=["scanned PDF has no text layer (OCR not implemented)",
+                       "password-protected PDF",
+                       "spreadsheet never opened in Excel has no cached values"],
+    ),
+    Ability(
+        id="document_info", category=Category.FILE_SEARCH,
+        environment="documents",
+        objective="Report a document's size, type and whether it can be read.",
+        params={"path": "the document to inspect"}, required=["path"],
+        risk=Risk.LOW, verification="result_only",
+    ),
+
     # -- hardware -----------------------------------------------------------
     # Reads are LOW; writes are MEDIUM because they are startling rather than
     # destructive - full volume at 2am should ask first.
