@@ -67,6 +67,15 @@ class Orchestrator:
         self.working = WorkingMemory()
         # What JARVIS still owes the user, carried across restarts.
         self.commitments = commitments.CommitmentBook(self.store)
+
+        # The model trained on this machine's own history. Optional by design:
+        # a missing or unreadable model must leave JARVIS fully working.
+        try:
+            from jarvis.learning.router_model import AbilityClassifier
+            self.learned = AbilityClassifier()
+        except Exception as exc:      # noqa: BLE001
+            emit("model.unavailable", error=str(exc))
+            self.learned = None
         self._progress = on_progress or (lambda _msg: None)
 
         self.local_os = LocalOSEnvironment()
@@ -217,6 +226,22 @@ class Orchestrator:
             parts.append(f"Known facts that may be relevant: {facts}")
         state = self.local_os.state()
         parts.append(f"User home directory: {state['home']}")
+
+        # What JARVIS has learned from its own use. The classifier predicts the
+        # ability, not its arguments, so this is given to the planner as a hint
+        # rather than executed directly - a wrong prediction then costs nothing,
+        # while a right one steers a weaker model onto the correct ability.
+        if self.learned is not None and self.learned.available:
+            hint = self.learned.predict(objective)
+            if hint is not None:
+                ability, confidence = hint
+                parts.append(
+                    f"Requests like this have previously been served by the "
+                    f"'{ability}' ability ({confidence:.0%} confidence, learned "
+                    f"from past runs on this machine). Prefer it unless the "
+                    f"request clearly needs something else.")
+                emit("model.hint", ability=ability,
+                     confidence=round(confidence, 3))
 
         # Closing the learning loop: a failure is only worth remembering if it
         # changes the next plan, so previous failures at similar work are put

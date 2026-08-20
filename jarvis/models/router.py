@@ -264,6 +264,10 @@ class Router:
     # -- availability ------------------------------------------------------
 
     def _usable(self, route: ModelRoute) -> tuple[bool, str]:
+        # Checked first so the status display tells the truth: a local route is
+        # unavailable because it is switched off, not because of RAM.
+        if route.tier is Tier.LOCAL and not settings.LOCAL_ENABLED:
+            return False, "local inference disabled (JARVIS_LOCAL_ENABLED=1 to re-enable)"
         until = self._benched.get(route.id)
         if until is not None:
             remaining = until - time.time()
@@ -311,10 +315,24 @@ class Router:
         """Ordered routes allowed to serve this request, best first."""
         pool = registry.all_routes()
 
+        # Local inference can be switched off entirely. This was a deliberate
+        # decision, not a default: measured directly, llama3:8b produced an
+        # invalid plan for "find which files mention X and tell me what it
+        # does", and only a single-step plan for "why is my pc slow" where the
+        # 550B route correctly produced two. The weakest model was doing the
+        # planning, which set the ceiling for the whole system.
+        #
+        # The cost is real and worth stating: with local disabled, a request
+        # that mentions a file path sends that path to a cloud provider. The
+        # privacy pin below can no longer be honoured on-device.
+        if not settings.LOCAL_ENABLED:
+            pool = [r for r in pool if r.tier is not Tier.LOCAL]
+
         # Hard privacy constraint: local-only requests may use on-device
-        # inference exclusively.
+        # inference exclusively - when any on-device route exists at all.
         if classification.privacy is Privacy.LOCAL_ONLY:
-            allowed = [r for r in pool if r.private]
+            private = [r for r in pool if r.private]
+            allowed = private if private else list(pool)
         else:
             allowed = list(pool)
 
@@ -360,17 +378,28 @@ class Router:
                  chain: list[ModelRoute]) -> str:
         bits: list[str] = []
         if classification.privacy is Privacy.LOCAL_ONLY:
-            bits.append("request references local files or machine state, so it "
-                        "is pinned to on-device inference and nothing is sent off "
-                        "the machine")
+            if route.tier is Tier.LOCAL:
+                bits.append("request references local files or machine state, so "
+                            "it is pinned to on-device inference and nothing is "
+                            "sent off the machine")
+            else:
+                # Saying "nothing leaves the machine" while calling a cloud API
+                # would be a straightforward lie, and it is exactly the claim a
+                # user would rely on.
+                bits.append("request references local files or machine state, "
+                            "which would normally pin it on-device - but local "
+                            "inference is disabled, so this WAS sent to a cloud "
+                            "provider")
         elif classification.needs_web:
             bits.append("needs current external information, which the stronger "
                         "remote model handles more reliably")
         elif classification.difficulty is Difficulty.HARD:
             bits.append("planning complexity is high")
-        else:
+        elif route.tier is Tier.LOCAL:
             bits.append("within the local model's reliable range, so it runs "
                         "on-device at no cost")
+        else:
+            bits.append("routed to the strongest free cloud model available")
         if route.metered:
             bits.append("only a metered provider was available")
         if len(chain) > 1:
