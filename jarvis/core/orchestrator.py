@@ -223,11 +223,20 @@ class Orchestrator:
                     emit("plan.rejected", goal_id=goal.id, route=route.id,
                          reason=verdict.reason)
                     self._progress(f"plan rejected: {verdict.reason}")
+                    self.router.observe(route.id, trace.classification,
+                                        success=False,
+                                        latency_ms=call.latency_ms)
                     continue
 
                 emit("plan.created", goal_id=goal.id, steps=len(plan.steps),
                      route=route.id, attempt=attempt + 1,
                      critic="passed" if verdict else "accepted_last_resort")
+                # The learner's reward is a plan the critic accepted, not
+                # merely an API call that returned - which is the distinction
+                # that makes the signal worth anything.
+                self.router.observe(route.id, trace.classification,
+                                    success=bool(verdict),
+                                    latency_ms=call.latency_ms)
                 return plan, "", provider
             except ModelUnavailable as exc:
                 errors.append(f"{route.id}: {exc}")

@@ -257,9 +257,38 @@ class Router:
     BREAKER_S = 90.0
     BREAKER_MAX_S = 600.0
 
-    def __init__(self) -> None:
+    def __init__(self, *, learn: bool = True) -> None:
         self._benched: dict[str, float] = {}   # route id -> expiry timestamp
         self._strikes: dict[str, int] = {}
+        self._bandit = None
+        if learn:
+            try:
+                from jarvis.learning.bandit import RouteBandit
+                self._bandit = RouteBandit()
+            except Exception as exc:      # noqa: BLE001 - routing must survive
+                emit("bandit.unavailable", error=str(exc))
+
+    @staticmethod
+    def task_kind(classification: Classification) -> str:
+        """A coarse task label the bandit keeps separate statistics for.
+
+        Coarse on purpose: too many buckets and each one has too little
+        evidence to learn from.
+        """
+        if classification.needs_web:
+            return "web"
+        if classification.needs_gui:
+            return "gui"
+        if classification.difficulty is Difficulty.HARD:
+            return "hard"
+        return "simple"
+
+    def observe(self, route_id: str, classification: Classification, *,
+                success: bool, latency_ms: float) -> None:
+        """Feed a real outcome back to the learner."""
+        if self._bandit is not None:
+            self._bandit.record(route_id, self.task_kind(classification),
+                                success=success, latency_ms=latency_ms)
 
     # -- availability ------------------------------------------------------
 
@@ -337,6 +366,18 @@ class Router:
             allowed = list(pool)
 
         usable = [r for r in allowed if self._usable(r)[0]]
+
+        # Learned ordering, applied only to what is already permitted. The
+        # hard constraints above (privacy, availability, circuit breaker) are
+        # never reachable from here - a bandit must not be able to learn its
+        # way around a safety rule.
+        if self._bandit is not None and len(usable) > 1:
+            kind = self.task_kind(classification)
+            by_id = {r.id: r for r in usable}
+            ordered = self._bandit.order(list(by_id), kind)
+            learned = [by_id[rid] for rid in ordered if rid in by_id]
+            if learned:
+                return learned
 
         hard = (classification.needs_web
                 or classification.difficulty is Difficulty.HARD)
