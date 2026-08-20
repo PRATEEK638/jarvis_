@@ -228,6 +228,30 @@ ABILITIES: list[Ability] = [
         params={"path": "repository folder"},
         risk=Risk.LOW, verification="records_returned",
     ),
+    # -- code execution -------------------------------------------------------
+    # The general-purpose primitive: given a problem nothing else covers,
+    # write code and run it. HIGH risk always - there is no container, so the
+    # only real control is that a human approves the source.
+    Ability(
+        id="run_python", category=Category.APP_CONTROL, environment="code",
+        objective="Write and run a Python script to compute or transform "
+                  "something no existing ability covers, and return its output.",
+        params={"code": "the Python source to run",
+                "timeout": "seconds before giving up (default 30)"},
+        required=["code"], risk=Risk.HIGH, verification="exit_code",
+        failure_modes=["syntax or runtime error", "timeout",
+                       "guardrails refuse destructive source"],
+        rollback="none automatic; the script runs in a scratch folder",
+    ),
+    Ability(
+        id="run_powershell", category=Category.APP_CONTROL, environment="code",
+        objective="Run a multi-line PowerShell script and return its output.",
+        params={"code": "the PowerShell source to run",
+                "timeout": "seconds before giving up (default 30)"},
+        required=["code"], risk=Risk.HIGH, verification="exit_code",
+        failure_modes=["nonzero exit", "timeout", "guardrails refuse source"],
+    ),
+
     # -- documents ----------------------------------------------------------
     # Read-only. Writing documents is a separate, riskier capability: a
     # malformed write silently corrupts something hard to reconstruct.

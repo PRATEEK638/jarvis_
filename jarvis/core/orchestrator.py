@@ -34,6 +34,7 @@ from jarvis.core.contracts import (
     VerificationResult,
 )
 from jarvis.core.events import emit, emit_trace
+from jarvis.environments.code import CodeEnvironment
 from jarvis.environments.documents import DocumentEnvironment
 from jarvis.environments.hardware import HardwareEnvironment
 from jarvis.environments.local_os import LocalOSEnvironment
@@ -86,6 +87,7 @@ class Orchestrator:
         self.repo = RepoEnvironment()
         self.hardware = HardwareEnvironment()
         self.documents = DocumentEnvironment()
+        self.code = CodeEnvironment()
         self.environments = {
             self.local_os.id: self.local_os,
             self.gui.id: self.gui,
@@ -93,6 +95,7 @@ class Orchestrator:
             self.repo.id: self.repo,
             self.hardware.id: self.hardware,
             self.documents.id: self.documents,
+            self.code.id: self.code,
         }
 
     # -- public ------------------------------------------------------------
