@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JARVIS — control</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#0b0d10; --panel:#12151a; --panel2:#171b21; --line:#242a33;
+  --text:#e6e9ef; --dim:#8b93a1; --dim2:#5c6472;
+  --accent:#3fd0ff; --accent-dim:#1c5b6e;
+  --ok:#3fe08a; --warn:#f5c451; --bad:#ff5d6c;
+  --mono:'Cascadia Code','Consolas',monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;
+  display:grid; grid-template-columns:280px 1fr 380px; grid-template-rows:56px 1fr;
+  grid-template-areas:"header header header" "sidebar main trace";
+  height:100vh; overflow:hidden;
+}
+header{
+  grid-area:header; display:flex; align-items:center; gap:14px;
+  padding:0 18px; border-bottom:1px solid var(--line); background:var(--panel);
+}
+.brand{font-weight:700; letter-spacing:.08em; color:var(--accent)}
+.brand small{color:var(--dim); font-weight:400; letter-spacing:0; margin-left:8px}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--dim2); flex-shrink:0}
+.pulse.on{background:var(--ok); box-shadow:0 0 8px var(--ok)}
+.pulse.busy{background:var(--warn); box-shadow:0 0 8px var(--warn); animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
+#conn{color:var(--dim); font-size:12px; margin-left:auto}
+
+aside{grid-area:sidebar; background:var(--panel); border-right:1px solid var(--line);
+  overflow-y:auto; padding:14px}
+section.panel{grid-area:main; display:flex; flex-direction:column; min-width:0}
+aside.trace{grid-area:trace; background:var(--panel); border-left:1px solid var(--line);
+  overflow-y:auto; padding:14px}
+
+h2{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim);
+  margin:18px 0 8px; font-weight:600}
+h2:first-child{margin-top:0}
+
+.row{display:flex; justify-content:space-between; align-items:center; gap:8px;
+  padding:5px 0; font-size:12.5px; border-bottom:1px solid #1a1e25}
+.row .k{color:var(--dim)}
+.row .v{font-family:var(--mono); text-align:right}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
+.dot.ready{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
+.tag{font-size:10px; padding:1px 6px; border-radius:3px; background:var(--panel2);
+  color:var(--dim); border:1px solid var(--line)}
+.tag.local{color:var(--ok); border-color:var(--accent-dim)}
+.tag.cloud{color:var(--accent)}
+
+#log{flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:10px}
+.entry{max-width:920px}
+.entry .who{font-size:11px; color:var(--dim); margin-bottom:3px; display:flex; gap:8px; align-items:center}
+.entry .who .badge{font-size:10px; padding:1px 6px; border-radius:3px}
+.badge.user{background:#1c2430; color:#9fd8ff}
+.badge.jarvis{background:#132a20; color:var(--ok)}
+.badge.sys{background:#241c14; color:var(--warn)}
+.entry .body{background:var(--panel2); border:1px solid var(--line); border-radius:8px;
+  padding:10px 14px; white-space:pre-wrap; word-break:break-word}
+.entry.mine .body{background:#10202a; border-color:#1a3a4a}
+.entry.error .body{border-color:#4a1c22; color:#ffb0b6}
+
+#composer{border-top:1px solid var(--line); padding:12px 16px; display:flex; gap:8px;
+  background:var(--panel)}
+#composer input{flex:1; background:var(--panel2); border:1px solid var(--line);
+  color:var(--text); border-radius:8px; padding:10px 14px; font-size:14px; outline:none}
+#composer input:focus{border-color:var(--accent)}
+button{background:var(--panel2); border:1px solid var(--line); color:var(--text);
+  border-radius:8px; padding:10px 16px; cursor:pointer; font-size:13px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent-dim); border-color:var(--accent); color:#dff8ff}
+button.mic{width:44px; font-size:16px; padding:0}
+button.mic.live{background:#3a1414; border-color:var(--bad); color:#ffb0b6; animation:blink 1.2s infinite}
+button:disabled{opacity:.4; cursor:default}
+
+.trace-item{border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:10px;
+  background:var(--panel2)}
+.trace-item .hdr{display:flex; justify-content:space-between; font-size:11px; color:var(--dim); margin-bottom:6px}
+.trace-item .step{font-family:var(--mono); font-size:11.5px; padding:3px 0; display:flex; gap:6px; align-items:baseline}
+.step .ok{color:var(--ok)} .step .bad{color:var(--bad)} .step .pending{color:var(--warn)}
+.confirm-card{border:1px solid var(--warn); background:#241d0f; border-radius:8px; padding:12px; margin-bottom:10px}
+.confirm-card .hdr{color:var(--warn); font-size:12px; font-weight:600; margin-bottom:6px}
+.confirm-card .args{font-family:var(--mono); font-size:11px; color:var(--dim); margin:6px 0;
+  word-break:break-all}
+.confirm-card .btns{display:flex; gap:8px; margin-top:8px}
+.confirm-card button.deny{border-color:var(--bad)}
+.confirm-card button.approve{border-color:var(--ok)}
+#empty{color:var(--dim2); text-align:center; margin-top:40px; font-size:13px}
+::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-thumb{background:#232833;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="pulse" id="pulse"></span>
+  <span class="brand">JARVIS<small>control interface</small></span>
+  <span id="conn">connecting…</span>
+</header>
+
+<aside>
+  <h2>Model registry</h2>
+  <div id="models"></div>
+  <h2>Environments</h2>
+  <div id="envs"></div>
+  <h2>Voice</h2>
+  <div id="voice"></div>
+  <h2>Abilities</h2>
+  <div id="abilities" style="max-height:160px; overflow-y:auto"></div>
+</aside>
+
+<section class="panel">
+  <div id="log"><div id="empty">Type a command, or hold the mic and speak. Every step JARVIS
+    takes appears live in the trace panel on the right — nothing here is simulated.</div></div>
+  <div id="composer">
+    <button class="mic" id="micBtn" title="Hold to talk">🎙</button>
+    <input id="input" type="text" placeholder="Tell JARVIS what to do…" autocomplete="off">
+    <button class="primary" id="sendBtn">Send</button>
+  </div>
+</section>
+
+<aside class="trace" id="trace">
+  <h2>Live execution trace</h2>
+  <div id="traceLog"></div>
+</aside>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const log = $('log'), traceLog = $('traceLog');
+const emptyMsg = $('empty');
+
+function addEntry(who, text, cls) {
+  if (emptyMsg) emptyMsg.remove();
+  const badge = {you:['user','you'], jarvis:['jarvis','JARVIS'], sys:['sys','system']}[who] || ['sys', who];
+  const e = document.createElement('div');
+  e.className = 'entry' + (who === 'you' ? ' mine' : '') + (cls === 'error' ? ' error' : '');
+  e.innerHTML = `<div class="who"><span class="badge ${badge[0]}">${badge[1]}</span></div>
+                 <div class="body"></div>`;
+  e.querySelector('.body').textContent = text;
+  log.appendChild(e);
+  log.scrollTop = log.scrollHeight;
+}
+
+// ---------- status panel ----------
+async function loadStatus() {
+  try {
+    const r = await fetch('/api/status'); const s = await r.json();
+    $('models').innerHTML = s.models.map(m => `
+      <div class="row"><span class="k"><span class="dot ${m.available?'ready':'bad'}"></span>${m.id}</span>
+      <span class="v"><span class="tag ${m.tier}">${m.tier}</span></span></div>`).join('');
+    const envRows = Object.entries(s.environments).map(([id, st]) => {
+      const ok = st.available !== false && !st.error;
+      return `<div class="row"><span class="k"><span class="dot ${ok?'ready':'bad'}"></span>${id}</span>
+              <span class="v">${st.online!==undefined ? (st.online?'online':'offline') : (ok?'ready':'error')}</span></div>`;
+    }).join('');
+    $('envs').innerHTML = envRows;
+    const v = s.voice;
+    $('voice').innerHTML = `
+      <div class="row"><span class="k"><span class="dot ${v.microphone.available?'ready':'bad'}"></span>mic</span><span class="v">${v.microphone.available?'ready':'n/a'}</span></div>
+      <div class="row"><span class="k"><span class="dot ${v.transcription.available?'ready':'bad'}"></span>gemini live</span><span class="v">${v.transcription.available?'ready':'no key'}</span></div>`;
+  } catch (e) { console.warn('status load failed', e); }
+  try {
+    const r = await fetch('/api/abilities'); const abilities = await r.json();
+    $('abilities').innerHTML = abilities.map(a =>
+      `<div class="row"><span class="k">${a.id}</span><span class="v"><span class="tag ${a.risk==='low'?'local':'cloud'}">${a.risk}</span></span></div>`
+    ).join('');
+  } catch (e) { console.warn('abilities load failed', e); }
+}
+loadStatus();
+setInterval(loadStatus, 15000);
+
+// ---------- pending confirmations ----------
+const pendingCards = {};
+function showConfirm(rec) {
+  const card = document.createElement('div');
+  card.className = 'confirm-card';
+  card.id = 'confirm-' + rec.id;
+  card.innerHTML = `
+    <div class="hdr">⚠ ${rec.risk.toUpperCase()} RISK — approve?</div>
+    <div><b>${rec.ability}</b></div>
+    <div class="args">${JSON.stringify(rec.args)}</div>
+    <div class="btns">
+      <button class="approve">Approve</button>
+      <button class="deny">Deny</button>
+    </div>`;
+  card.querySelector('.approve').onclick = () => resolveConfirm(rec.id, true, card);
+  card.querySelector('.deny').onclick = () => resolveConfirm(rec.id, false, card);
+  traceLog.prepend(card);
+  pendingCards[rec.id] = card;
+}
+async function resolveConfirm(id, approve, card) {
+  card.querySelectorAll('button').forEach(b => b.disabled = true);
+  await fetch(`/api/confirm/${id}`, {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({approve})});
+  card.style.opacity = '0.5';
+}
+
+// ---------- live trace rendering ----------
+const traceCards = {};
+function traceCard(goalId) {
+  if (traceCards[goalId]) return traceCards[goalId];
+  const card = document.createElement('div');
+  card.className = 'trace-item';
+  card.innerHTML = `<div class="hdr"><span>goal ${goalId}</span><span class="status">running…</span></div>
+                     <div class="steps"></div>`;
+  traceLog.prepend(card);
+  traceCards[goalId] = card;
+  return card;
+}
+function addStep(goalId, text, cls) {
+  const card = traceCard(goalId);
+  const s = document.createElement('div');
+  s.className = 'step';
+  s.innerHTML = `<span class="${cls||''}">${text}</span>`;
+  card.querySelector('.steps').appendChild(s);
+}
+
+// ---------- event stream ----------
+let es;
+function connectEvents() {
+  es = new WebSocket(`ws://${location.host}/ws/events`);
+  es.onopen = () => { $('conn').textContent = 'connected'; $('pulse').className = 'pulse on'; };
+  es.onclose = () => { $('conn').textContent = 'reconnecting…'; $('pulse').className = 'pulse';
+    setTimeout(connectEvents, 1500); };
+  es.onmessage = (msg) => {
+    const rec = JSON.parse(msg.data);
+    handleEvent(rec);
+  };
+}
+function handleEvent(rec) {
+  const k = rec.kind;
+  if (k === 'goal.received') { $('pulse').className = 'pulse busy'; addStep(rec.goal_id, `received: ${rec.objective}`); }
+  else if (k === 'confirmation.requested') showConfirm(rec);
+  else if (k === 'confirmation.resolved') {
+    const c = pendingCards[rec.id]; if (c) c.querySelector('.hdr').textContent =
+      rec.approved ? '✓ approved' : '✗ denied';
+  }
+  else if (k === 'web.goal_finished') {
+    $('pulse').className = 'pulse on';
+    const r = rec.record;
+    for (const step of (r.plan && r.plan.steps) || []) {
+      addStep(rec.goal_id, `${step.ability} → ${step.status}`,
+        step.status === 'done' ? 'ok' : (step.status === 'failed' ? 'bad' : 'pending'));
+    }
+    const card = traceCards[rec.goal_id];
+    if (card) card.querySelector('.status').textContent = r.ok ? 'done' : 'failed';
+    addEntry('jarvis', r.message || '(no output)', r.ok ? '' : 'error');
+  }
+  else if (k === 'web.goal_error') {
+    const card = traceCards[rec.goal_id];
+    if (card) card.querySelector('.status').textContent = 'error';
+    addEntry('sys', rec.error, 'error');
+    $('pulse').className = 'pulse on';
+  }
+  else if (k && k.startsWith('model.')) addStep(rec.goal_id || 'model', `${k}: ${rec.route || ''}`);
+  else if (k === 'ability.executed' || k === 'voice.tool_call') {
+    addStep(rec.goal_id || 'voice', `${k}: ${rec.ability || ''}`);
+  }
+}
+connectEvents();
+
+// ---------- text command ----------
+async function sendGoal() {
+  const input = $('input');
+  const text = input.value.trim();
+  if (!text) return;
+  addEntry('you', text);
+  input.value = '';
+  const r = await fetch('/api/goal', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({objective: text})});
+  const data = await r.json();
+  if (data.goal_id) traceCard(data.goal_id);
+}
+$('sendBtn').onclick = sendGoal;
+$('input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendGoal(); });
+
+// ---------- voice (hold-to-talk over the browser mic) ----------
+let voiceWs = null, audioCtx = null, micStream = null, micNode = null, playHead = 0;
+const micBtn = $('micBtn');
+
+function downsampleTo16k(float32, inRate) {
+  const ratio = inRate / 16000;
+  const outLen = Math.floor(float32.length / ratio);
+  const out = new Int16Array(outLen);
+  for (let i = 0; i < outLen; i++) {
+    const s = Math.max(-1, Math.min(1, float32[Math.floor(i * ratio)]));
+    out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+  }
+  return out;
+}
+
+function playPcm16(bytes) {
+  if (!audioCtx) return;
+  const int16 = new Int16Array(bytes);
+  const float32 = new Float32Array(int16.length);
+  for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
+  const buf = audioCtx.createBuffer(1, float32.length, 24000);
+  buf.copyToChannel(float32, 0);
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf; src.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+  const startAt = Math.max(now, playHead);
+  src.start(startAt);
+  playHead = startAt + buf.duration;
+}
+
+async function startVoice() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  playHead = 0;
+  micStream = await navigator.mediaDevices.getUserMedia({audio: {channelCount: 1}});
+  voiceWs = new WebSocket(`ws://${location.host}/ws/voice`);
+  voiceWs.binaryType = 'arraybuffer';
+  addEntry('sys', 'voice session started — speak naturally');
+
+  voiceWs.onmessage = (msg) => {
+    if (msg.data instanceof ArrayBuffer) { playPcm16(msg.data); return; }
+    const rec = JSON.parse(msg.data);
+    if (rec.type === 'interrupt') { playHead = audioCtx.currentTime; return; }
+    if (rec.type === 'error') { addEntry('sys', rec.text, 'error'); return; }
+    if (rec.type === 'event') {
+      if (rec.kind === 'you' || rec.kind === 'jarvis') addEntry(rec.kind, rec.text);
+      else addStep('voice', `${rec.kind}: ${rec.text}`);
+    }
+  };
+  voiceWs.onclose = () => addEntry('sys', 'voice session ended');
+
+  const source = audioCtx.createMediaStreamSource(micStream);
+  micNode = audioCtx.createScriptProcessor(4096, 1, 1);
+  // A ScriptProcessorNode only fires once its output reaches the destination,
+  // but the mic must never be audible through the speakers (that would howl).
+  // A silent gain node satisfies the graph requirement without any playback.
+  const silence = audioCtx.createGain();
+  silence.gain.value = 0;
+  source.connect(micNode); micNode.connect(silence); silence.connect(audioCtx.destination);
+  micNode.onaudioprocess = (e) => {
+    if (!voiceWs || voiceWs.readyState !== 1) return;
+    const pcm16 = downsampleTo16k(e.inputBuffer.getChannelData(0), audioCtx.sampleRate);
+    voiceWs.send(pcm16.buffer);
+  };
+}
+
+function stopVoice() {
+  if (voiceWs) { try { voiceWs.send(JSON.stringify({type:'stop'})); } catch(e){} voiceWs.close(); voiceWs = null; }
+  if (micNode) { micNode.disconnect(); micNode = null; }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+  micBtn.classList.remove('live');
+}
+
+micBtn.addEventListener('mousedown', () => { micBtn.classList.add('live'); startVoice(); });
+micBtn.addEventListener('mouseup', stopVoice);
+micBtn.addEventListener('mouseleave', () => { if (micBtn.classList.contains('live')) stopVoice(); });
+</script>
+</body>
+</html>
