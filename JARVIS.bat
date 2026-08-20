@@ -1,6 +1,7 @@
 @echo off
 REM JARVIS launcher. Double-click, or run from a terminal.
-REM   JARVIS.bat              interactive session
+REM   JARVIS.bat              the desktop application (default)
+REM   JARVIS.bat --cli        text-only terminal session
 REM   JARVIS.bat --web        the browser control interface, at localhost:8731
 REM   JARVIS.bat --voice      talk to it
 REM   JARVIS.bat --status     what is available right now
@@ -40,7 +41,19 @@ if "%~1"=="--web" (
     goto :eof
 )
 
-".venv\Scripts\python.exe" -m jarvis %*
+REM Default to the desktop app: it is the real product surface, and unlike the
+REM browser it gets direct microphone/speaker access, so voice actually works.
+if "%~1"=="" (
+    start "" ".venv\Scripts\pythonw.exe" -m jarvis.desktop
+    goto :eof
+)
 
-if "%~1"=="" pause
+if "%~1"=="--cli" (
+    shift
+    ".venv\Scripts\python.exe" -m jarvis %*
+    pause
+    goto :eof
+)
+
+".venv\Scripts\python.exe" -m jarvis %*
 endlocal

@@ -9,10 +9,12 @@ PowerShell only where Windows exposes nothing better, never pixel guessing.
 
 from __future__ import annotations
 
+import ctypes
 import os
 import shutil
 import subprocess
 import time
+from ctypes import wintypes
 from pathlib import Path
 from typing import Any
 
@@ -88,6 +90,43 @@ def _expand(raw: str) -> Path:
                 return base / rest if rest else base
         p = Path.cwd() / p
     return p
+
+
+_DIALOG_CLASS = "#32770"   # the standard Windows dialog-box window class
+_WM_CLOSE = 0x0010
+
+
+def _close_stray_error_dialog(app_name: str) -> bool:
+    """Close a Windows dialog that popped up while resolving `app_name`.
+
+    Scoped deliberately narrowly: only a #32770 dialog whose title bar is
+    exactly the app name we just tried to launch is closed (that is what
+    cmd's `start` names its own "Windows cannot find X" error box) - never a
+    dialog matched only by having no title, which could be anything on the
+    user's desktop unrelated to this action.
+    """
+    user32 = ctypes.windll.user32
+    found = False
+
+    def callback(hwnd, _lparam):
+        nonlocal found
+        class_name = ctypes.create_unicode_buffer(256)
+        user32.GetClassNameW(hwnd, class_name, 256)
+        if class_name.value != _DIALOG_CLASS:
+            return True
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length == 0:
+            return True
+        title = ctypes.create_unicode_buffer(length + 1)
+        user32.GetWindowTextW(hwnd, title, length + 1)
+        if title.value.strip().lower() == app_name.strip().lower():
+            user32.PostMessageW(hwnd, _WM_CLOSE, 0, 0)
+            found = True
+        return True
+
+    proc = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)(callback)
+    user32.EnumWindows(proc, 0)
+    return found
 
 
 def _iter_files(roots: list[Path], *, want_text_only: bool = False):
@@ -488,6 +527,14 @@ class LocalOSEnvironment:
             if target.endswith(":"):  # ms-settings: style URI
                 os.startfile(target)  # noqa: S606 - launching a known URI
             else:
+                # cmd's `start` resolves more than a plain ShellExecute call
+                # does (App Paths, some Store-app friendly names), which is why
+                # it is kept over os.startfile despite the next problem: on an
+                # unresolvable name it shows ITS OWN blocking Windows dialog
+                # ("Windows cannot find <name>") that a caught exception cannot
+                # suppress, since it is a separate top-level window - left
+                # alone it sits on screen waiting for a human click, which is
+                # not acceptable for an autonomous action.
                 subprocess.Popen(  # noqa: S603
                     ["cmd.exe", "/c", "start", "", target],
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -499,20 +546,25 @@ class LocalOSEnvironment:
         stem = Path(target).stem
         pids: list[int] = []
         deadline = time.time() + 8
+        dialog_closed = False
         while time.time() < deadline:
             pids = self._find_process(stem)
             if set(pids) - before:
                 break
+            if not dialog_closed:
+                dialog_closed = _close_stray_error_dialog(name)
             time.sleep(0.3)
         new = sorted(set(pids) - before)
         ok = bool(pids)
+        summary = (f"Launched {name} (pid {new[0]})" if new
+                  else f"{name} is running" if ok
+                  else f"Launched {name} but no matching process appeared - "
+                       f"Windows could not resolve that name" if dialog_closed
+                  else f"Launched {name} but no matching process appeared")
         return ActionResult(
-            ok=ok,
-            summary=(f"Launched {name} (pid {new[0]})" if new
-                     else f"{name} is running" if ok
-                     else f"Launched {name} but no matching process appeared"),
+            ok=ok, summary=summary,
             evidence={"name": name, "target": target, "pids": pids,
-                      "new_pids": new})
+                      "new_pids": new, "resolution_failed": dialog_closed})
 
     def _list_processes(self, args: dict[str, Any]) -> ActionResult:
         top = int(args.get("top", 12))

@@ -2,129 +2,230 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>JARVIS — control</title>
+<title>J.A.R.V.I.S — control</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0d10; --panel:#12151a; --panel2:#171b21; --line:#242a33;
-  --text:#e6e9ef; --dim:#8b93a1; --dim2:#5c6472;
-  --accent:#3fd0ff; --accent-dim:#1c5b6e;
-  --ok:#3fe08a; --warn:#f5c451; --bad:#ff5d6c;
-  --mono:'Cascadia Code','Consolas',monospace;
+  --bg:#02050a; --bg2:#050b14;
+  --cyan:#3ef0ff; --cyan-dim:#0f5c6e; --cyan-glow:rgba(62,240,255,.55);
+  --amber:#ffb020; --red:#ff3b4e; --green:#38ffb0;
+  --panel:rgba(10,20,30,.55); --panel-line:rgba(62,240,255,.28);
+  --text:#cdeef5; --dim:#5f8a96; --dim2:#3a5b64;
+  --font-hud:'Orbitron',sans-serif; --font-mono:'Share Tech Mono',monospace;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0; background:var(--bg); color:var(--text);
-  font:14px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;
-  display:grid; grid-template-columns:280px 1fr 380px; grid-template-rows:56px 1fr;
+  font:14px/1.5 var(--font-mono);
+  display:grid; grid-template-columns:300px 1fr 400px; grid-template-rows:64px 1fr;
   grid-template-areas:"header header header" "sidebar main trace";
-  height:100vh; overflow:hidden;
+  height:100vh; overflow:hidden; position:relative;
 }
+
+/* ---------- ambient HUD background ---------- */
+body::before{ /* drifting floor grid */
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(var(--cyan-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cyan-dim) 1px, transparent 1px);
+  background-size:42px 42px; opacity:.14;
+  animation:driftgrid 26s linear infinite;
+  mask-image:radial-gradient(ellipse 90% 80% at 50% 0%, #000 40%, transparent 100%);
+}
+@keyframes driftgrid{ from{background-position:0 0} to{background-position:420px 420px} }
+body::after{ /* vignette + scan sweep */
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(ellipse 120% 100% at 50% 0%, transparent 55%, #000 100%);
+}
+.scan{position:fixed; left:0; right:0; height:120px; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg, transparent, rgba(62,240,255,.05), transparent);
+  animation:scan 7s linear infinite;}
+@keyframes scan{ from{top:-120px} to{top:100vh} }
+
+header, aside, section{position:relative; z-index:2}
+
+/* ---------- header ---------- */
 header{
-  grid-area:header; display:flex; align-items:center; gap:14px;
-  padding:0 18px; border-bottom:1px solid var(--line); background:var(--panel);
+  grid-area:header; display:flex; align-items:center; gap:16px;
+  padding:0 22px; border-bottom:1px solid var(--panel-line);
+  background:linear-gradient(180deg, rgba(6,14,22,.9), rgba(6,14,22,.55));
+  backdrop-filter:blur(6px);
 }
-.brand{font-weight:700; letter-spacing:.08em; color:var(--accent)}
-.brand small{color:var(--dim); font-weight:400; letter-spacing:0; margin-left:8px}
-.pulse{width:8px;height:8px;border-radius:50%;background:var(--dim2); flex-shrink:0}
-.pulse.on{background:var(--ok); box-shadow:0 0 8px var(--ok)}
-.pulse.busy{background:var(--warn); box-shadow:0 0 8px var(--warn); animation:blink 1s infinite}
-@keyframes blink{50%{opacity:.3}}
-#conn{color:var(--dim); font-size:12px; margin-left:auto}
+.brand{font-family:var(--font-hud); font-weight:900; font-size:20px; letter-spacing:.32em;
+  color:var(--cyan); text-shadow:0 0 12px var(--cyan-glow), 0 0 2px #fff;}
+.brand small{display:block; font-family:var(--font-mono); font-size:9px; letter-spacing:.25em;
+  color:var(--dim); font-weight:400; margin-top:2px}
+.core{width:30px;height:30px;border-radius:50%; position:relative; flex-shrink:0}
+.core i{position:absolute; inset:0; border-radius:50%; border:2px solid transparent;
+  border-top-color:var(--cyan); animation:spin 2.4s linear infinite;}
+.core i:nth-child(2){inset:5px; border-top-color:var(--cyan); opacity:.6; animation-duration:1.6s; animation-direction:reverse;}
+.core b{position:absolute; inset:10px; border-radius:50%; background:var(--cyan);
+  box-shadow:0 0 14px 3px var(--cyan-glow);}
+@keyframes spin{to{transform:rotate(360deg)}}
+#conn{margin-left:auto; font-size:11px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase;
+  display:flex; align-items:center; gap:8px}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--dim2); box-shadow:0 0 0 var(--red)}
+.pulse.on{background:var(--green); box-shadow:0 0 10px 2px var(--green)}
+.pulse.busy{background:var(--amber); box-shadow:0 0 10px 2px var(--amber); animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+.clock{font-family:var(--font-hud); font-size:13px; color:var(--dim); letter-spacing:.1em}
 
-aside{grid-area:sidebar; background:var(--panel); border-right:1px solid var(--line);
-  overflow-y:auto; padding:14px}
+/* ---------- HUD panel primitive ---------- */
+.hud{
+  position:relative; background:var(--panel); border:1px solid var(--panel-line);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+  padding:12px 14px; margin-bottom:12px;
+}
+.hud::before,.hud::after{content:""; position:absolute; width:10px; height:10px; pointer-events:none}
+.hud::before{top:-1px; left:-1px; border-top:2px solid var(--cyan); border-left:2px solid var(--cyan)}
+.hud::after{bottom:-1px; right:-1px; border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan)}
+
+aside{grid-area:sidebar; overflow-y:auto; padding:16px; border-right:1px solid var(--panel-line)}
+aside.trace{grid-area:trace; overflow-y:auto; padding:16px; border-left:1px solid var(--panel-line)}
 section.panel{grid-area:main; display:flex; flex-direction:column; min-width:0}
-aside.trace{grid-area:trace; background:var(--panel); border-left:1px solid var(--line);
-  overflow-y:auto; padding:14px}
 
-h2{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim);
-  margin:18px 0 8px; font-weight:600}
-h2:first-child{margin-top:0}
+h2{font-family:var(--font-hud); font-size:10px; text-transform:uppercase; letter-spacing:.22em;
+  color:var(--cyan); margin:0 0 10px; font-weight:700; display:flex; align-items:center; gap:8px}
+h2::before{content:""; width:14px; height:1px; background:var(--cyan); box-shadow:0 0 6px var(--cyan-glow)}
+
+/* ---------- gauges ---------- */
+.gauges{display:flex; justify-content:space-between; gap:6px; margin-bottom:4px}
+.gauge{text-align:center; flex:1}
+.gauge svg{width:64px; height:64px}
+.gauge .val{font-family:var(--font-hud); font-size:13px; fill:var(--cyan)}
+.gauge .lbl{font-size:9px; letter-spacing:.15em; color:var(--dim); margin-top:4px; text-transform:uppercase}
+.gauge .track{fill:none; stroke:rgba(62,240,255,.12); stroke-width:5}
+.gauge .fill{fill:none; stroke:var(--cyan); stroke-width:5; stroke-linecap:round;
+  filter:drop-shadow(0 0 4px var(--cyan-glow)); transition:stroke-dashoffset .6s ease}
+.gauge.warn .fill{stroke:var(--amber); filter:drop-shadow(0 0 4px var(--amber))}
+.gauge.crit .fill{stroke:var(--red); filter:drop-shadow(0 0 4px var(--red))}
 
 .row{display:flex; justify-content:space-between; align-items:center; gap:8px;
-  padding:5px 0; font-size:12.5px; border-bottom:1px solid #1a1e25}
+  padding:5px 0; font-size:11.5px; border-bottom:1px solid rgba(62,240,255,.08)}
+.row:last-child{border-bottom:none}
 .row .k{color:var(--dim)}
-.row .v{font-family:var(--mono); text-align:right}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
-.dot.ready{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
-.tag{font-size:10px; padding:1px 6px; border-radius:3px; background:var(--panel2);
-  color:var(--dim); border:1px solid var(--line)}
-.tag.local{color:var(--ok); border-color:var(--accent-dim)}
-.tag.cloud{color:var(--accent)}
+.row .v{text-align:right}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px; box-shadow:0 0 6px currentColor}
+.dot.ready{background:var(--green); color:var(--green)}
+.dot.bad{background:var(--red); color:var(--red)}
+.tag{font-size:9px; padding:1px 6px; border:1px solid var(--panel-line); letter-spacing:.08em;
+  color:var(--dim); text-transform:uppercase}
+.tag.local{color:var(--green); border-color:var(--green)}
+.tag.cloud{color:var(--cyan); border-color:var(--cyan)}
 
-#log{flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:10px}
-.entry{max-width:920px}
-.entry .who{font-size:11px; color:var(--dim); margin-bottom:3px; display:flex; gap:8px; align-items:center}
-.entry .who .badge{font-size:10px; padding:1px 6px; border-radius:3px}
-.badge.user{background:#1c2430; color:#9fd8ff}
-.badge.jarvis{background:#132a20; color:var(--ok)}
-.badge.sys{background:#241c14; color:var(--warn)}
-.entry .body{background:var(--panel2); border:1px solid var(--line); border-radius:8px;
+/* ---------- log / conversation ---------- */
+#log{flex:1; overflow-y:auto; padding:20px 26px; display:flex; flex-direction:column; gap:12px}
+.entry{max-width:900px}
+.entry .who{font-family:var(--font-hud); font-size:9px; letter-spacing:.18em; color:var(--dim);
+  margin-bottom:4px; text-transform:uppercase}
+.entry.mine .who{color:var(--cyan)}
+.entry .body{background:var(--panel); border:1px solid var(--panel-line); border-left:2px solid var(--dim2);
   padding:10px 14px; white-space:pre-wrap; word-break:break-word}
-.entry.mine .body{background:#10202a; border-color:#1a3a4a}
-.entry.error .body{border-color:#4a1c22; color:#ffb0b6}
+.entry.mine .body{border-left-color:var(--cyan)}
+.entry.error .body{border-left-color:var(--red); color:#ffb3ba}
+#empty{color:var(--dim2); text-align:center; margin-top:60px; font-size:12px; letter-spacing:.05em}
 
-#composer{border-top:1px solid var(--line); padding:12px 16px; display:flex; gap:8px;
-  background:var(--panel)}
-#composer input{flex:1; background:var(--panel2); border:1px solid var(--line);
-  color:var(--text); border-radius:8px; padding:10px 14px; font-size:14px; outline:none}
-#composer input:focus{border-color:var(--accent)}
-button{background:var(--panel2); border:1px solid var(--line); color:var(--text);
-  border-radius:8px; padding:10px 16px; cursor:pointer; font-size:13px}
-button:hover{border-color:var(--accent)}
-button.primary{background:var(--accent-dim); border-color:var(--accent); color:#dff8ff}
-button.mic{width:44px; font-size:16px; padding:0}
-button.mic.live{background:#3a1414; border-color:var(--bad); color:#ffb0b6; animation:blink 1.2s infinite}
-button:disabled{opacity:.4; cursor:default}
+#composer{border-top:1px solid var(--panel-line); padding:14px 20px; display:flex; gap:10px;
+  background:rgba(6,14,22,.6)}
+#composer input{flex:1; background:rgba(4,10,16,.8); border:1px solid var(--panel-line);
+  color:var(--text); padding:11px 16px; font:13px var(--font-mono); outline:none;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
+#composer input:focus{border-color:var(--cyan); box-shadow:0 0 8px rgba(62,240,255,.25) inset}
+button{background:rgba(62,240,255,.06); border:1px solid var(--panel-line); color:var(--cyan);
+  padding:11px 18px; cursor:pointer; font:11px var(--font-hud); letter-spacing:.12em; text-transform:uppercase;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px); transition:all .15s}
+button:hover{border-color:var(--cyan); box-shadow:0 0 12px rgba(62,240,255,.3); background:rgba(62,240,255,.14)}
+button:disabled{opacity:.35; cursor:default}
 
-.trace-item{border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:10px;
-  background:var(--panel2)}
-.trace-item .hdr{display:flex; justify-content:space-between; font-size:11px; color:var(--dim); margin-bottom:6px}
-.trace-item .step{font-family:var(--mono); font-size:11.5px; padding:3px 0; display:flex; gap:6px; align-items:baseline}
-.step .ok{color:var(--ok)} .step .bad{color:var(--bad)} .step .pending{color:var(--warn)}
-.confirm-card{border:1px solid var(--warn); background:#241d0f; border-radius:8px; padding:12px; margin-bottom:10px}
-.confirm-card .hdr{color:var(--warn); font-size:12px; font-weight:600; margin-bottom:6px}
-.confirm-card .args{font-family:var(--mono); font-size:11px; color:var(--dim); margin:6px 0;
-  word-break:break-all}
+/* ---------- voice orb ---------- */
+.orb-wrap{position:relative; width:52px; height:52px; flex-shrink:0; cursor:pointer}
+.orb-wrap svg{position:absolute; inset:0; width:100%; height:100%}
+.orb-ring{fill:none; stroke:var(--panel-line); stroke-width:1.5}
+.orb-ring.spin{stroke:var(--cyan); stroke-dasharray:18 60; animation:spin 3s linear infinite; opacity:.7}
+.orb-core{fill:var(--cyan-dim); stroke:var(--cyan); stroke-width:1; transition:all .2s}
+.orb-wrap:hover .orb-core{fill:rgba(62,240,255,.35)}
+.orb-wrap.live .orb-core{fill:var(--red); stroke:var(--red); filter:drop-shadow(0 0 10px var(--red))}
+.orb-wrap.live .orb-ring.spin{stroke:var(--red); animation-duration:.8s}
+.orb-wrap.live{animation:pulseorb 1s ease-in-out infinite}
+@keyframes pulseorb{0%,100%{transform:scale(1)} 50%{transform:scale(1.08)}}
+
+/* ---------- trace ---------- */
+.trace-item{border:1px solid var(--panel-line); background:var(--panel); padding:10px 12px; margin-bottom:10px;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
+.trace-item .hdr{display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:9px;
+  letter-spacing:.1em; color:var(--dim); margin-bottom:6px; text-transform:uppercase}
+.trace-item .status{color:var(--amber)}
+.trace-item .status.done{color:var(--green)}
+.trace-item .status.failed,.trace-item .status.error{color:var(--red)}
+.trace-item .step{font-size:11px; padding:2px 0; display:flex; gap:6px; align-items:baseline}
+.step .ok{color:var(--green)} .step .bad{color:var(--red)} .step .pending{color:var(--amber)}
+.confirm-card{border:1px solid var(--amber); background:rgba(255,176,32,.06); padding:12px; margin-bottom:10px;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
+.confirm-card .hdr{font-family:var(--font-hud); color:var(--amber); font-size:11px; letter-spacing:.1em;
+  margin-bottom:6px; text-transform:uppercase}
+.confirm-card .args{font-size:10.5px; color:var(--dim); margin:6px 0; word-break:break-all}
 .confirm-card .btns{display:flex; gap:8px; margin-top:8px}
-.confirm-card button.deny{border-color:var(--bad)}
-.confirm-card button.approve{border-color:var(--ok)}
-#empty{color:var(--dim2); text-align:center; margin-top:40px; font-size:13px}
-::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-thumb{background:#232833;border-radius:4px}
+.confirm-card button.deny{border-color:var(--red); color:var(--red)}
+.confirm-card button.approve{border-color:var(--green); color:var(--green)}
+
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-thumb{background:var(--cyan-dim)}
+#abilities{max-height:170px; overflow-y:auto}
 </style>
 </head>
 <body>
+<div class="scan"></div>
 
 <header>
-  <span class="pulse" id="pulse"></span>
-  <span class="brand">JARVIS<small>control interface</small></span>
-  <span id="conn">connecting…</span>
+  <div class="core"><i></i><i></i><b></b></div>
+  <div class="brand">J . A . R . V . I . S<small>autonomous control interface</small></div>
+  <span id="conn"><span class="pulse" id="pulse"></span> connecting</span>
+  <span class="clock" id="clock">--:--:--</span>
 </header>
 
 <aside>
-  <h2>Model registry</h2>
-  <div id="models"></div>
-  <h2>Environments</h2>
-  <div id="envs"></div>
-  <h2>Voice</h2>
-  <div id="voice"></div>
-  <h2>Abilities</h2>
-  <div id="abilities" style="max-height:160px; overflow-y:auto"></div>
+  <div class="hud">
+    <h2>Telemetry</h2>
+    <div class="gauges" id="gauges"></div>
+  </div>
+  <div class="hud">
+    <h2>Model registry</h2>
+    <div id="models"></div>
+  </div>
+  <div class="hud">
+    <h2>Environments</h2>
+    <div id="envs"></div>
+  </div>
+  <div class="hud">
+    <h2>Voice</h2>
+    <div id="voice"></div>
+  </div>
+  <div class="hud">
+    <h2>Abilities</h2>
+    <div id="abilities"></div>
+  </div>
 </aside>
 
 <section class="panel">
-  <div id="log"><div id="empty">Type a command, or hold the mic and speak. Every step JARVIS
-    takes appears live in the trace panel on the right — nothing here is simulated.</div></div>
+  <div id="log"><div id="empty">AWAITING INSTRUCTION — type a command, or hold the core to speak.
+    Every action taken appears live in the execution trace — nothing here is simulated.</div></div>
   <div id="composer">
-    <button class="mic" id="micBtn" title="Hold to talk">🎙</button>
-    <input id="input" type="text" placeholder="Tell JARVIS what to do…" autocomplete="off">
-    <button class="primary" id="sendBtn">Send</button>
+    <div class="orb-wrap" id="micBtn" title="Hold to talk">
+      <svg viewBox="0 0 52 52">
+        <circle class="orb-ring" cx="26" cy="26" r="24"></circle>
+        <circle class="orb-ring spin" cx="26" cy="26" r="18"></circle>
+        <circle class="orb-core" cx="26" cy="26" r="9"></circle>
+      </svg>
+    </div>
+    <input id="input" type="text" placeholder="TELL JARVIS WHAT TO DO…" autocomplete="off">
+    <button id="sendBtn">Execute</button>
   </div>
 </section>
 
-<aside class="trace" id="trace">
+<aside class="trace">
   <h2>Live execution trace</h2>
   <div id="traceLog"></div>
 </aside>
@@ -134,31 +235,57 @@ const $ = (id) => document.getElementById(id);
 const log = $('log'), traceLog = $('traceLog');
 const emptyMsg = $('empty');
 
+function tick(){ $('clock').textContent = new Date().toLocaleTimeString('en-GB'); }
+tick(); setInterval(tick, 1000);
+
 function addEntry(who, text, cls) {
   if (emptyMsg) emptyMsg.remove();
-  const badge = {you:['user','you'], jarvis:['jarvis','JARVIS'], sys:['sys','system']}[who] || ['sys', who];
+  const label = {you:'you', jarvis:'jarvis', sys:'system'}[who] || who;
   const e = document.createElement('div');
   e.className = 'entry' + (who === 'you' ? ' mine' : '') + (cls === 'error' ? ' error' : '');
-  e.innerHTML = `<div class="who"><span class="badge ${badge[0]}">${badge[1]}</span></div>
-                 <div class="body"></div>`;
+  e.innerHTML = `<div class="who">${label}</div><div class="body"></div>`;
   e.querySelector('.body').textContent = text;
   log.appendChild(e);
   log.scrollTop = log.scrollHeight;
+}
+
+// ---------- radial gauge ----------
+function gaugeSvg(pct, label) {
+  pct = Math.max(0, Math.min(100, pct || 0));
+  const r = 26, c = 2 * Math.PI * r, off = c * (1 - pct / 100);
+  const cls = pct > 85 ? 'crit' : (pct > 65 ? 'warn' : '');
+  return `<div class="gauge ${cls}">
+    <svg viewBox="0 0 64 64">
+      <circle class="track" cx="32" cy="32" r="${r}"></circle>
+      <circle class="fill" cx="32" cy="32" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${off}"
+        transform="rotate(-90 32 32)"></circle>
+      <text x="32" y="37" text-anchor="middle" class="val">${Math.round(pct)}</text>
+    </svg>
+    <div class="lbl">${label}</div>
+  </div>`;
 }
 
 // ---------- status panel ----------
 async function loadStatus() {
   try {
     const r = await fetch('/api/status'); const s = await r.json();
+    const local = s.environments.local_os || {};
+    $('gauges').innerHTML =
+      gaugeSvg(local.cpu_percent, 'CPU') +
+      gaugeSvg(local.ram_percent, 'RAM') +
+      gaugeSvg(local.disk_percent, 'DISK');
+
     $('models').innerHTML = s.models.map(m => `
       <div class="row"><span class="k"><span class="dot ${m.available?'ready':'bad'}"></span>${m.id}</span>
       <span class="v"><span class="tag ${m.tier}">${m.tier}</span></span></div>`).join('');
+
     const envRows = Object.entries(s.environments).map(([id, st]) => {
       const ok = st.available !== false && !st.error;
       return `<div class="row"><span class="k"><span class="dot ${ok?'ready':'bad'}"></span>${id}</span>
               <span class="v">${st.online!==undefined ? (st.online?'online':'offline') : (ok?'ready':'error')}</span></div>`;
     }).join('');
     $('envs').innerHTML = envRows;
+
     const v = s.voice;
     $('voice').innerHTML = `
       <div class="row"><span class="k"><span class="dot ${v.microphone.available?'ready':'bad'}"></span>mic</span><span class="v">${v.microphone.available?'ready':'n/a'}</span></div>
@@ -206,7 +333,7 @@ function traceCard(goalId) {
   if (traceCards[goalId]) return traceCards[goalId];
   const card = document.createElement('div');
   card.className = 'trace-item';
-  card.innerHTML = `<div class="hdr"><span>goal ${goalId}</span><span class="status">running…</span></div>
+  card.innerHTML = `<div class="hdr"><span>goal ${goalId}</span><span class="status">running</span></div>
                      <div class="steps"></div>`;
   traceLog.prepend(card);
   traceCards[goalId] = card;
@@ -224,38 +351,40 @@ function addStep(goalId, text, cls) {
 let es;
 function connectEvents() {
   es = new WebSocket(`ws://${location.host}/ws/events`);
-  es.onopen = () => { $('conn').textContent = 'connected'; $('pulse').className = 'pulse on'; };
-  es.onclose = () => { $('conn').textContent = 'reconnecting…'; $('pulse').className = 'pulse';
+  es.onopen = () => { $('conn').innerHTML = '<span class="pulse on" id="pulse"></span> online'; };
+  es.onclose = () => { $('conn').innerHTML = '<span class="pulse" id="pulse"></span> reconnecting';
     setTimeout(connectEvents, 1500); };
-  es.onmessage = (msg) => {
-    const rec = JSON.parse(msg.data);
-    handleEvent(rec);
-  };
+  es.onmessage = (msg) => handleEvent(JSON.parse(msg.data));
+}
+function setPulse(cls) {
+  const p = document.getElementById('pulse');
+  if (p) p.className = 'pulse ' + cls;
 }
 function handleEvent(rec) {
   const k = rec.kind;
-  if (k === 'goal.received') { $('pulse').className = 'pulse busy'; addStep(rec.goal_id, `received: ${rec.objective}`); }
+  if (k === 'goal.received') { setPulse('busy'); addStep(rec.goal_id, `received: ${rec.objective}`); }
   else if (k === 'confirmation.requested') showConfirm(rec);
   else if (k === 'confirmation.resolved') {
     const c = pendingCards[rec.id]; if (c) c.querySelector('.hdr').textContent =
       rec.approved ? '✓ approved' : '✗ denied';
   }
   else if (k === 'web.goal_finished') {
-    $('pulse').className = 'pulse on';
+    setPulse('on');
     const r = rec.record;
     for (const step of (r.plan && r.plan.steps) || []) {
       addStep(rec.goal_id, `${step.ability} → ${step.status}`,
         step.status === 'done' ? 'ok' : (step.status === 'failed' ? 'bad' : 'pending'));
     }
     const card = traceCards[rec.goal_id];
-    if (card) card.querySelector('.status').textContent = r.ok ? 'done' : 'failed';
+    if (card) { const st = card.querySelector('.status'); st.textContent = r.ok ? 'done' : 'failed';
+      st.className = 'status ' + (r.ok ? 'done' : 'failed'); }
     addEntry('jarvis', r.message || '(no output)', r.ok ? '' : 'error');
   }
   else if (k === 'web.goal_error') {
     const card = traceCards[rec.goal_id];
-    if (card) card.querySelector('.status').textContent = 'error';
+    if (card) { const st = card.querySelector('.status'); st.textContent = 'error'; st.className = 'status error'; }
     addEntry('sys', rec.error, 'error');
-    $('pulse').className = 'pulse on';
+    setPulse('on');
   }
   else if (k && k.startsWith('model.')) addStep(rec.goal_id || 'model', `${k}: ${rec.route || ''}`);
   else if (k === 'ability.executed' || k === 'voice.tool_call') {
@@ -331,9 +460,6 @@ async function startVoice() {
 
   const source = audioCtx.createMediaStreamSource(micStream);
   micNode = audioCtx.createScriptProcessor(4096, 1, 1);
-  // A ScriptProcessorNode only fires once its output reaches the destination,
-  // but the mic must never be audible through the speakers (that would howl).
-  // A silent gain node satisfies the graph requirement without any playback.
   const silence = audioCtx.createGain();
   silence.gain.value = 0;
   source.connect(micNode); micNode.connect(silence); silence.connect(audioCtx.destination);

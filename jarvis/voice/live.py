@@ -29,6 +29,7 @@ from jarvis.abilities import registry as ability_registry
 from jarvis.config import settings
 from jarvis.core.contracts import Risk
 from jarvis.core.events import emit
+from jarvis.voice.gain import InputGain
 
 # Audio constants dictated by the Live API.
 INPUT_RATE = 16_000
@@ -55,7 +56,23 @@ what actually happened, using the result you were given. If a tool reports a
 failure, say so; never claim success you were not told about.
 
 Do not narrate your reasoning or announce which tool you are about to use.
-Act, then report."""
+Act, then report.
+
+CRITICAL - the microphone is always open, so you will hear things that are not
+addressed to you: background conversation, video or music playback, typing, and
+half-caught fragments of speech.
+
+- If what you heard is not clearly an instruction directed at you, say nothing
+  at all and take no action. Silence is the correct response to ambient noise.
+- Never guess at an instruction from a fragment. If you caught only part of
+  something and it might matter, ask a single short question rather than
+  inventing a task ("Sorry, what was that?").
+- Never invent a subject the user did not mention. If you did not hear which
+  files, which app, or which folder, ask - do not assume one.
+- A single word, a filler sound, or punctuation alone is not an instruction.
+
+The user may speak English, Hindi, or a mix of both. Understand either, and
+reply in whichever language they used."""
 
 
 def voice_available() -> tuple[bool, str]:
@@ -103,11 +120,38 @@ def tool_declarations() -> list[dict[str, Any]]:
     return declarations
 
 
+def _rms_level(pcm: bytes) -> float:
+    """Amplitude of a 16-bit PCM block, 0.0-1.0.
+
+    Used to drive the visualiser from the real signal rather than animating
+    something that merely looks like audio. Pure stdlib so no numpy dependency
+    is forced on the voice path.
+    """
+    if not pcm:
+        return 0.0
+    count = len(pcm) // 2
+    if count == 0:
+        return 0.0
+    total = 0
+    # Sampling every 8th frame is plenty for a level meter and keeps this cheap
+    # enough to run on the audio callback thread.
+    step = max(1, count // 256)
+    taken = 0
+    for i in range(0, count, step):
+        sample = int.from_bytes(pcm[i * 2:i * 2 + 2], "little", signed=True)
+        total += sample * sample
+        taken += 1
+    if not taken:
+        return 0.0
+    return min(1.0, ((total / taken) ** 0.5) / 32768.0 * 4.0)
+
+
 class _Speaker:
     """Plays model audio, and can be silenced instantly for barge-in."""
 
-    def __init__(self) -> None:
+    def __init__(self, on_level=None) -> None:
         import sounddevice as sd
+        self._on_level = on_level
         self._q: queue.Queue[bytes | None] = queue.Queue()
         self._stream = sd.RawOutputStream(
             samplerate=OUTPUT_RATE, channels=CHANNELS, dtype="int16",
@@ -131,6 +175,8 @@ class _Speaker:
                 break
 
     def play(self, pcm: bytes) -> None:
+        if self._on_level:
+            self._on_level(_rms_level(pcm))
         self._q.put(pcm)
 
     def interrupt(self) -> None:
@@ -166,6 +212,8 @@ class VoiceSession:
         mic_chunks: AsyncIterator[bytes] | None = None,
         audio_out: Callable[[bytes], None] | None = None,
         on_interrupt: Callable[[], None] | None = None,
+        on_input_level: Callable[[float], None] | None = None,
+        on_output_level: Callable[[float], None] | None = None,
     ) -> None:
         """
         `mic_chunks` / `audio_out` / `on_interrupt` let a non-native transport
@@ -184,6 +232,14 @@ class VoiceSession:
         self._external_mic = mic_chunks
         self._audio_out = audio_out
         self._on_interrupt = on_interrupt
+        # Optional amplitude taps for a visualiser. Called from the audio
+        # callback thread, so implementations must be non-blocking.
+        self._on_input_level = on_input_level
+        self._on_output_level = on_output_level
+        # This machine's microphone captures very quietly; without conditioning
+        # the model receives a near-silent stream and invents speech. Applied to
+        # both transports so browser and native behave identically.
+        self._gain = InputGain()
 
     # -- public -----------------------------------------------------------
 
@@ -223,7 +279,18 @@ class VoiceSession:
                 "inputAudioTranscription": {},
                 "outputAudioTranscription": {},
                 "realtimeInputConfig": {
-                    "automaticActivityDetection": {},
+                    # Tighter than the defaults on purpose. With an always-open
+                    # microphone the default sensitivity treats room noise and
+                    # brief sounds as the start of a turn, which is what made
+                    # JARVIS answer things nobody said. Requiring a higher start
+                    # threshold and a longer silence before ending a turn means
+                    # it waits for an actual sentence.
+                    "automaticActivityDetection": {
+                        "startOfSpeechSensitivity": "START_SENSITIVITY_LOW",
+                        "endOfSpeechSensitivity": "END_SENSITIVITY_LOW",
+                        "prefixPaddingMs": 300,
+                        "silenceDurationMs": 900,
+                    },
                     "activityHandling": "START_OF_ACTIVITY_INTERRUPTS",
                 },
             }
@@ -257,6 +324,8 @@ class VoiceSession:
             def on_mic(indata, _frames, _time, status) -> None:
                 if status:
                     emit("voice.mic_status", status=str(status))
+                if self._on_input_level:
+                    self._on_input_level(_rms_level(bytes(indata)))
                 # Called on the audio thread: hand off without blocking it.
                 try:
                     loop.call_soon_threadsafe(
@@ -270,7 +339,7 @@ class VoiceSession:
             mic.start()
 
         if self._audio_out is None:
-            self._speaker = _Speaker()
+            self._speaker = _Speaker(on_level=self._on_output_level)
 
         emit("voice.session_start", model=settings.GEMINI_VOICE_MODEL,
              voice=self._voice, transport="browser" if mic is None else "native")
@@ -313,8 +382,15 @@ class VoiceSession:
 
     async def _send_audio(self, ws) -> None:
         assert self._mic_queue is not None
+        frames = 0
         while not self._stop.is_set():
             chunk = await self._mic_queue.get()
+            chunk = self._gain.process(chunk)
+            frames += 1
+            if frames % 50 == 0:      # roughly every 5 s of audio
+                emit("voice.input_gain", gain=round(self._gain.gain, 2),
+                     rms_in=round(self._gain.last_rms_in, 5),
+                     rms_out=round(self._gain.last_rms_out, 5))
             await ws.send(json.dumps({
                 "realtimeInput": {
                     "audio": {
