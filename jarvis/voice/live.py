@@ -442,17 +442,44 @@ class VoiceSession:
         if calls:
             await self._run_tools(ws, calls)
 
+    # Abilities that regularly take long enough for silence to feel like a
+    # hang. Measured from the event log rather than guessed: research and web
+    # fetches run into seconds, a folder scan across user directories can too.
+    _SLOW_ABILITIES = {
+        "research", "web_search", "fetch_page", "find_files",
+        "search_in_files", "run_python", "run_powershell", "run_command",
+        "read_document", "repo_search", "resolve_file",
+    }
+    PREAMBLE_AFTER_S = 0.7
+
     async def _run_tools(self, ws, calls: list[dict[str, Any]]) -> None:
-        """Execute requested abilities and return their real results."""
+        """Execute requested abilities and return their real results.
+
+        Long tool calls used to produce dead air: the model stops speaking, the
+        work runs, and the user hears nothing until it finishes. Silence in a
+        spoken conversation reads as a hang, so a slow call now gets a spoken
+        acknowledgement first.
+
+        The preamble is only emitted for abilities known to be slow, and only
+        after a short delay, so a fast call is not padded with a pointless
+        "one moment" that makes it feel slower than it is.
+        """
         responses = []
         for call in calls:
             name = call.get("name", "")
             args = call.get("args") or {}
             self._on_event("action", f"{name} {json.dumps(args, default=str)[:90]}")
             emit("voice.tool_call", ability=name, args=args)
+
+            task = asyncio.create_task(
+                asyncio.to_thread(self._execute, name, args))
+            if name in self._SLOW_ABILITIES:
+                done, _ = await asyncio.wait({task},
+                                             timeout=self.PREAMBLE_AFTER_S)
+                if not done:
+                    await self._speak_preamble(ws, name)
             try:
-                # Executed off the event loop: file and shell work is blocking.
-                result = await asyncio.to_thread(self._execute, name, args)
+                result = await task
             except Exception as exc:                      # noqa: BLE001
                 result = f"failed: {type(exc).__name__}: {exc}"
             self._on_event("result", result[:200])
@@ -462,3 +489,34 @@ class VoiceSession:
                 "response": {"result": result},
             })
         await ws.send(json.dumps({"toolResponse": {"functionResponses": responses}}))
+
+    async def _speak_preamble(self, ws, ability: str) -> None:
+        """Say something brief while a slow tool runs.
+
+        Sent as a text turn so the live model speaks it in its own voice,
+        rather than splicing in separately synthesised audio that would not
+        match.
+        """
+        line = {
+            "research": "Let me look that up.",
+            "web_search": "Searching now.",
+            "fetch_page": "Fetching that page.",
+            "find_files": "Looking through your files.",
+            "resolve_file": "Finding that file.",
+            "search_in_files": "Searching inside your files.",
+            "read_document": "Reading it now.",
+            "repo_search": "Searching the repository.",
+        }.get(ability, "One moment.")
+        emit("voice.preamble", ability=ability)
+        self._on_event("jarvis", line)
+        try:
+            await ws.send(json.dumps({
+                "clientContent": {
+                    "turns": [{"role": "user",
+                               "parts": [{"text":
+                                          f"[system] Say exactly: {line}"}]}],
+                    "turnComplete": True,
+                }
+            }))
+        except Exception:             # noqa: BLE001 - never fail the tool call
+            pass
