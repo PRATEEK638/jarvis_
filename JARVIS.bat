@@ -1,0 +1,46 @@
+@echo off
+REM JARVIS launcher. Double-click, or run from a terminal.
+REM   JARVIS.bat              interactive session
+REM   JARVIS.bat --web        the browser control interface, at localhost:8731
+REM   JARVIS.bat --voice      talk to it
+REM   JARVIS.bat --status     what is available right now
+REM   JARVIS.bat "create a folder called reports on my desktop"
+
+setlocal
+cd /d "%~dp0"
+
+if not exist ".venv\Scripts\python.exe" (
+    echo First run: creating the virtual environment...
+    python -m venv .venv
+    if errorlevel 1 (
+        echo.
+        echo Could not create the virtual environment. Is Python 3.11+ installed
+        echo and on PATH? Try: python --version
+        pause
+        exit /b 1
+    )
+    echo Installing dependencies...
+    ".venv\Scripts\python.exe" -m pip install --quiet --upgrade pip
+    ".venv\Scripts\python.exe" -m pip install --quiet -r jarvis\requirements.txt
+)
+
+REM Ollama serves the local model; start it if it is installed but not running.
+curl -s -m 2 http://localhost:11434/api/tags >nul 2>&1
+if errorlevel 1 (
+    where ollama >nul 2>&1
+    if not errorlevel 1 (
+        echo Starting Ollama...
+        start "" /min ollama serve
+        timeout /t 3 /nobreak >nul
+    )
+)
+
+if "%~1"=="--web" (
+    ".venv\Scripts\python.exe" -m jarvis.web
+    goto :eof
+)
+
+".venv\Scripts\python.exe" -m jarvis %*
+
+if "%~1"=="" pause
+endlocal

@@ -1,0 +1,8 @@
+{
+  "_comment": "Copy this file to keys.json (gitignored, never commit real keys). Every provider is optional: JARVIS runs fully local with none of them. A value can be a single string OR an array of strings - an array is a pool that JARVIS rotates through automatically when one key hits a free-tier rate limit.",
+  "gemini": ["", ""],
+  "gemini_voice": "a key reserved for the voice interface, so heavy voice use doesn't consume the text-planning quota - falls back to 'gemini' if omitted",
+  "openrouter": ["", "", ""],
+  "nvidia": "",
+  "sarvam": ["", ""]
+}

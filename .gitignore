@@ -1,0 +1,29 @@
+# Secrets - never commit
+jarvis/config/keys.json
+
+# Runtime data (event log, traces, memory database)
+jarvis/data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Benchmark output
+benchmark_results/
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Test-run artifacts (created by jarvis/stress.py and jarvis/benchmark.py, or
+# swept in from a stray earlier run on the real Desktop) - never repo content
+test_artifacts_archive/
+jarvis_stress*/
+jarvis_benchmark*/
+
+# Server logs from ad-hoc local runs
+uvicorn.log
